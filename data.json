@@ -1,0 +1,61 @@
+{
+    "layers": [
+    {
+      "id": "present",
+      "name": "Present",
+      "order": 0
+    },
+    {
+      "id": "transitions",
+      "name": "Transitions",
+      "order": 1
+    },
+    {
+      "id": "future",
+      "name": "Future",
+      "order": 2
+    }
+  ],
+    "nodes": [
+    {
+      "title" : "This is the node #1.",
+      "layerId": "present"
+    },
+    {
+      "title" : "This is the node #2.",
+      "layerId": "present"
+    },
+    {
+      "title" : "This is the node #3.",
+      "layerId": "present"
+    },
+    {
+      "title" : "This is the node #4.",
+      "layerId": "present"
+    },
+    {
+      "title" : "This is the node #5.",
+      "layerId": "transitions"
+    },
+    {
+      "title" : "This is the node #6.",
+      "layerId": "transitions"
+    },
+    {
+      "title" : "This is the node #7.",
+      "layerId": "transitions"
+    },
+    {
+      "title" : "This is the node #8.",
+      "layerId": "future"
+    },
+    {
+      "title" : "This is the node #9.",
+      "layerId": "future"
+    },
+    {
+      "title" : "This is the node #10.",
+      "layerId": "future"
+    }
+  ]
+}
