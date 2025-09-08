@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 // Scene setup
 const scene = new THREE.Scene()
-scene.background = new THREE.Color(0x222222)
+scene.background = new THREE.Color(0x171717)
 
 // Camera setup
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -14,6 +17,11 @@ camera.lookAt(0, 0, 0)
 const renderer = new THREE.WebGLRenderer({ antialias: true })
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
+
+// Post-processing setup
+const composer = new EffectComposer(renderer)
+composer.addPass(new RenderPass(scene, camera))
+composer.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.3, 0.2, 0.6))
 
 // OrbitControls setup
 const controls = new OrbitControls(camera, renderer.domElement)
@@ -35,7 +43,54 @@ directionalLight.position.set(10, 10, 5)
 scene.add(directionalLight)
 
 // Array to store sphere meshes with their data
-const spheres = []
+const spheres = [];
+let sphereRadius = 0.25;
+
+// Array to store connection lines
+const connections = []
+
+// Function to calculate the bounding box of all spheres
+function calculateBoundingBox() {
+  if (spheres.length === 0) return null
+  
+  const box = new THREE.Box3()
+  spheres.forEach(sphere => {
+    const sphereBox = new THREE.Box3().setFromObject(sphere)
+    box.expandByPoint(sphereBox.min)
+    box.expandByPoint(sphereBox.max)
+  })
+  
+  return box
+}
+
+// Function to fit camera to show all layers
+function fitCameraToLayers() {
+  const boundingBox = calculateBoundingBox()
+  if (!boundingBox) return
+  
+  const center = boundingBox.getCenter(new THREE.Vector3())
+  const size = boundingBox.getSize(new THREE.Vector3())
+  
+  // Calculate the maximum dimension
+  const maxDim = Math.max(size.x, size.y, size.z)
+  
+  // Calculate distance needed based on field of view
+  const fov = camera.fov * (Math.PI / 180)
+  const distance = maxDim / (2 * Math.tan(fov / 2)) * 1.5 // Add 50% padding
+  
+  // Position camera to look at the center from a good angle
+  camera.position.set(
+    center.x + distance * 0.7,
+    center.y + distance * 0.1,
+    center.z + distance * 0.7
+  )
+  
+  camera.lookAt(center)
+  
+  // Update orbit controls target
+  controls.target.copy(center)
+  controls.update()
+}
 
 // Function to check if a position is too close to existing spheres
 function isPositionValid(newPosition, existingSpheres, minDistance = 2) {
@@ -49,11 +104,11 @@ function isPositionValid(newPosition, existingSpheres, minDistance = 2) {
 }
 
 // Function to generate a valid position that doesn't overlap
-function generateValidPosition(existingSpheres, maxAttempts = 100) {
+function generateValidPosition(existingSpheres, yPosition = 0, maxAttempts = 100) {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const position = new THREE.Vector3(
       (Math.random() - 0.5) * 15,
-      0,
+      yPosition,
       (Math.random() - 0.5) * 15
     )
     
@@ -65,9 +120,80 @@ function generateValidPosition(existingSpheres, maxAttempts = 100) {
   // Fallback: return a position even if it might be close to others
   return new THREE.Vector3(
     (Math.random() - 0.5) * 15,
-    0,
+    yPosition,
     (Math.random() - 0.5) * 15
   )
+}
+
+// Function to create a bezier curve between two points
+function createBezierCurve(startPos, endPos, layerSpacing = 10) {
+  
+  // Adjust start and end points to sphere surface (top/bottom)
+  const adjustedStart = new THREE.Vector3(
+    startPos.x,
+    startPos.y - sphereRadius, // Top of source sphere
+    startPos.z
+  )
+  
+  const adjustedEnd = new THREE.Vector3(
+    endPos.x,
+    endPos.y + sphereRadius, // Bottom of target sphere
+    endPos.z
+  )
+  
+  // Calculate control points with specific positioning
+  const controlPoint1 = new THREE.Vector3(
+    adjustedStart.x,
+    adjustedStart.y - (layerSpacing * 0.4),
+    adjustedStart.z
+  )
+  
+  const controlPoint2 = new THREE.Vector3(
+    adjustedEnd.x,
+    adjustedEnd.y + (layerSpacing * 0.4),
+    adjustedEnd.z
+  )
+  
+  // Create the bezier curve
+  const curve = new THREE.CubicBezierCurve3(adjustedStart, controlPoint1, controlPoint2, adjustedEnd)
+  
+  return curve
+}
+
+// Function to create connection lines between spheres
+function createConnections(data) {
+  const layerSpacing = 10 // Same as defined in loadData function
+  
+  data.connections.forEach((connection) => {
+    // Find the source and target spheres
+    const sourceSphere = spheres.find(sphere => sphere.userData.id === connection.source)
+    const targetSphere = spheres.find(sphere => sphere.userData.id === connection.target)
+    
+    if (sourceSphere && targetSphere) {
+      // Create bezier curve with layer spacing
+      const curve = createBezierCurve(sourceSphere.position, targetSphere.position, layerSpacing)
+      
+      // Create geometry from curve
+      const points = curve.getPoints(50) // 50 points for smooth curve
+      const geometry = new THREE.BufferGeometry().setFromPoints(points)
+      
+      // Create material for the line
+      const material = new THREE.LineBasicMaterial({
+        color: 0x76E3AB,
+        opacity: 0.2,
+        transparent: true,
+        linewidth: 2
+      })
+      
+      // Create the line
+      const line = new THREE.Line(geometry, material)
+      line.userData = connection
+      
+      // Add to scene and connections array
+      scene.add(line)
+      connections.push(line)
+    }
+  })
 }
 
 // Raycaster for click detection
@@ -81,20 +207,37 @@ async function loadData() {
     const response = await fetch("data.json")
     const data = await response.json()
 
-    // Create spheres for each node
-    const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16)
+    // Create layer Y position mapping
+    const layerYPositions = {}
+    let layerSpacing = 10 // Distance between layers
+    
+    // Calculate total height and center offset
+    const maxOrder = Math.max(...data.layers.map(layer => layer.order))
+    const totalHeight = maxOrder * layerSpacing
+    const centerOffset = totalHeight * 0.5
+    
+    data.layers.forEach((layer) => {
+      layerYPositions[layer.id] = -layer.order * layerSpacing + centerOffset
+    })
 
-    data.nodes.forEach((node, index) => {
-      // Create material with random color
+    // Create spheres for each node
+    const sphereGeometry = new THREE.SphereGeometry(sphereRadius, 32, 16)
+
+    data.nodes.forEach((node) => {
+      // Create material with emissive color for bloom effect
       const material = new THREE.MeshPhongMaterial({
         color: new THREE.Color(0xffffff),
+        emissive: new THREE.Color(0xffffff)
       })
 
       // Create sphere mesh
       const sphere = new THREE.Mesh(sphereGeometry, material)
 
+      // Get the Y position for this node's layer
+      const layerY = layerYPositions[node.layerId] || 0
+
       // Generate a valid position that doesn't overlap with existing spheres
-      const validPosition = generateValidPosition(spheres)
+      const validPosition = generateValidPosition(spheres, layerY)
       sphere.position.copy(validPosition)
 
       // Remove render order modifications since we don't want spheres on top of each other
@@ -109,40 +252,17 @@ async function loadData() {
       spheres.push(sphere)
     })
 
+    // Create connections between spheres
+    createConnections(data)
+
+    // Fit camera to show all layers after loading
+    fitCameraToLayers()
+
   } catch (error) {
     console.error("Error loading data:", error)
-    // Fallback: create spheres with sample data
-    createFallbackSpheres()
   }
 }
 
-// Fallback function if file reading fails
-function createFallbackSpheres() {
-  const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 16)
-
-  for (let i = 1; i <= 10; i++) {
-    const material = new THREE.MeshPhongMaterial({
-      color: new THREE.Color(Math.random(), Math.random(), Math.random()),
-    })
-
-    const sphere = new THREE.Mesh(sphereGeometry, material)
-
-    // Generate a valid position that doesn't overlap with existing spheres
-    const validPosition = generateValidPosition(spheres)
-    sphere.position.copy(validPosition)
-
-    // Remove render order modifications since we don't want spheres on top of each other
-    // sphere.renderOrder = 1000
-    // sphere.material.depthTest = false
-
-    sphere.userData = { title: `This is the node #${i}.` }
-
-    scene.add(sphere)
-    spheres.push(sphere)
-  }
-
-  console.log("Using fallback data - created 10 spheres")
-}
 
 // Mouse click handler
 function onMouseClick(event) {
@@ -158,14 +278,18 @@ function onMouseClick(event) {
 
   if (intersects.length > 0) {
     const clickedSphere = intersects[0].object
-    console.log("Clicked sphere data:", clickedSphere.userData)
+
+    //console.log(clickedSphere.userData.title)
+    console.log("This node ID is: " + clickedSphere.userData.id)
 
     // Visual feedback - make sphere briefly glow
     const originalEmissive = clickedSphere.material.emissive.getHex()
-    clickedSphere.material.emissive.setHex(0xffffff)
+
+    clickedSphere.material.emissive.setHex(0x61B58A);
+    clickedSphere.material.color.set(0x6FD4A0)
     setTimeout(() => {
       clickedSphere.material.emissive.setHex(originalEmissive)
-    }, 200)
+    }, 1000)
   }
 }
 
@@ -177,6 +301,7 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
   renderer.setSize(window.innerWidth, window.innerHeight)
+  composer.setSize(window.innerWidth, window.innerHeight)
 }
 window.addEventListener("resize", onWindowResize)
 
@@ -192,7 +317,7 @@ function animate() {
     sphere.rotation.y += 0.01
   })
 
-  renderer.render(scene, camera)
+  composer.render()
 }
 
 // Initialize
