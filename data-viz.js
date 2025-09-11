@@ -10,13 +10,13 @@ scene.background = new THREE.Color(0x171717)
 
 // Camera setup
 // PERSPECTIVE CAMERA
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
 
 // ORTHOGRAPHIC CAMERA
 //const camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000 );
 
-camera.position.set(0, 10, 20)
-camera.lookAt(0, 0, 0)
+camera.position.set(0, 180, 50)
+camera.lookAt(1, 1, 1)
 
 // Renderer setup
 const renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -38,6 +38,15 @@ controls.touches = {
 	ONE: THREE.TOUCH.ROTATE,
 	TWO: THREE.TOUCH.DOLLY_PAN
 }
+
+// Animation control variables
+let isUserControlling = false
+let lastInteractionTime = 0
+let animationTimeout
+let animationStartTime = 0
+let userCameraAngle = 0
+let userCameraRadius = 25
+let userCameraY = 10
 
 // Lighting
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.9)
@@ -86,11 +95,20 @@ function fitCameraToLayers() {
   // Position camera to look at the center from a good angle
   camera.position.set(
     center.x + distance * 0.7,
-    center.y + distance * 0.1,
-    center.z + distance * 0.7
+    center.y + distance * 0.25, // adjust up and down camera angles
+    center.z + distance * 0.7,
   )
   
   camera.lookAt(center)
+
+  console.log(center)
+
+  console.log(camera.position)
+  
+  // Update animation variables to match the new camera position
+  userCameraAngle = Math.atan2(camera.position.z - center.z, camera.position.x - center.x)
+  userCameraRadius = Math.sqrt((camera.position.x - center.x) ** 2 + (camera.position.z - center.z) ** 2)
+  userCameraY = camera.position.y
   
   // Update orbit controls target
   controls.target.copy(center)
@@ -294,12 +312,30 @@ function onMouseClick(event) {
     clickedSphere.material.color.set(0x6FD4A0)
     setTimeout(() => {
       clickedSphere.material.emissive.setHex(originalEmissive)
-    }, 1000)
+    }, 500)
   }
 }
 
 // Add event listener
 window.addEventListener("click", onMouseClick)
+
+// Camera control event listeners
+controls.addEventListener('start', () => {
+  isUserControlling = true
+  clearTimeout(animationTimeout)
+})
+
+controls.addEventListener('end', () => {
+  lastInteractionTime = Date.now()
+  animationTimeout = setTimeout(() => {
+    // Calculate the current angle, radius, and Y position based on camera position
+    userCameraAngle = Math.atan2(camera.position.z, camera.position.x)
+    userCameraRadius = Math.sqrt(camera.position.x * camera.position.x + camera.position.z * camera.position.z)
+    userCameraY = camera.position.y
+    animationStartTime = Date.now()
+    isUserControlling = false
+  }, 500) // Time to restart the camera rotation animation
+})
 
 // Handle window resize
 function onWindowResize() {
@@ -317,10 +353,20 @@ function animate() {
   // Update controls
   controls.update()
 
+  // Camera animation - rotate around x-axis only when user is not controlling
+  if (!isUserControlling) {
+    const timeSinceStart = (Date.now() - animationStartTime) * 0.00015
+    const currentAngle = userCameraAngle + (timeSinceStart * 0.5)
+    camera.position.x = Math.cos(currentAngle) * userCameraRadius
+    camera.position.z = Math.sin(currentAngle) * userCameraRadius
+    camera.position.y = userCameraY
+    camera.lookAt(0, 0, 0)
+  }
+
   // Slowly rotate all spheres
-  spheres.forEach((sphere) => {
-    sphere.rotation.y += 0.01
-  })
+  // spheres.forEach((sphere) => {
+  //   sphere.rotation.y += 0.01
+  // })
 
   composer.render()
 }
