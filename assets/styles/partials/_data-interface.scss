@@ -1,0 +1,23 @@
+@use 'variables' as *;
+
+.node-popup {
+  position: fixed;
+  top: $m-spacing;
+  right: $m-spacing;
+  width: 400px;
+  border: solid 1px $neutral-700;
+  border-radius: 10px;
+  padding: $s-spacing;
+  background-color: $neutral-100;
+  color: white;
+  z-index: 30;
+
+  .close-btn {
+    position: absolute;
+    top: $s-spacing;
+    right: $s-spacing;
+    cursor: pointer;
+
+  }
+
+}

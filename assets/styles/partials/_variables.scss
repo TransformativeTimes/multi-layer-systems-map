@@ -1,0 +1,175 @@
+$neutral-100: #171717;
+$neutral-200: #26282A;
+$neutral-300: #353A3D;
+$neutral-400: #464D52;
+$neutral-500: #59636B;
+$neutral-600: #6A747C;
+$neutral-700: #7C868E;
+$neutral-800: #969EA5;
+$neutral-900: #ADB3B9;
+$neutral-1000: #C4CACE;
+$neutral-1100: #DCE0E3;
+$neutral-1200: #F5F7F9;
+
+$green-100: #202B26;
+$green-200: #314F41;
+$green-300: #42745B;
+$green-400: #539774;
+$green-500: #61B58A;
+$green-600: #6FD4A0;
+$green-700: #76E3AB;
+$green-800: #9FF2C8;
+$green-900: #C1FFE1;
+$green-1000: #CFFFE8;
+$green-1100: #E2FFF1;
+$green-1200: #F5FFFA;
+
+$purple-100: #22202B;
+$purple-200: #34304C;
+$purple-300: #463F6E;
+$purple-400: #584F8F;
+$purple-500: #6A5FB1;
+$purple-600: #7C6ED2;
+$purple-700: #8576E3;
+$purple-800: #A499EB;
+$purple-900: #B9B0F0;
+$purple-1000: #CEC7F5;
+$purple-1100: #E2DFFA;
+$purple-1200: #F7F6FF;
+
+$blue-100: #1C282E;
+$blue-100: #254354;
+$blue-100: #2E5F7A;
+$blue-100: #377AA0;
+$blue-100: #4096C6;
+$blue-100: #49B1EC;
+$blue-100: #4DBFFF;
+$blue-100: #7ACFFF;
+$blue-100: #98DAFF;
+$blue-100: #B7E5FF;
+$blue-100: #D5F0FF;
+$blue-100: #F3FBFF;
+
+$yellow-100: #383827;
+$yellow-200: #5B5A38;
+$yellow-300: #7D7C48;
+$yellow-400: #A09D59;
+$yellow-500: #C2BF69;
+$yellow-600: #E5E17A;
+$yellow-700: #F6F282;
+$yellow-800: #F8F59F;
+$yellow-900: #F9F7B3;
+$yellow-1000: #FAF9C7;
+$yellow-1100: #FCFBDA;
+$yellow-1200: #FDFDEE;
+
+$orange-100: #3A2E26;
+$orange-200: #5E4635;
+$orange-300: #825E45;
+$orange-400: #A57554;
+$orange-500: #C98D63;
+$orange-600: #EDA572;
+$orange-700: #FFB17A;
+$orange-800: #FFC49B;
+$orange-900: #FFD1B1;
+$orange-1000: #FFDEC7;
+$orange-1100: #FFEBDD;
+$orange-1200: #FFF8F3;
+
+$red-100: #3A2525;
+$red-200: #5E3434;
+$red-300: #824343;
+$red-400: #A55252;
+$red-500: #C96161;
+$red-600: #ED7070;
+$red-700: #FF7777;
+$red-800: #FF9999;
+$red-900: #FFB0B0;
+$red-1000: #FFC7C7;
+$red-1100: #FFDEDE;
+$red-1200: #FFF5F5;
+
+
+$xs-spacing: 5px;
+$s-spacing: 10px;
+$m-spacing: 20px;
+$l-spacing: 40px;
+$xl-spacing: 60px;
+$xxl-spacing: 100px;
+
+$work-sans: "Work Sans", sans-serif;
+$garamond: "EB Garamond", serif;
+$syne: "Syne", sans-serif;
+
+
+// WORK SANS
+@font-face {
+  font-family: "Work Sans", serif;
+  src: url('assets/fonts/work_sans/EBGaramond-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Work Sans", sans-serif;
+  src: url('assets/fonts/work_sans/WorkSans-Italic-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+// EB GARAMOND
+@font-face {
+  font-family: "EB Garamond", serif;
+  src: url('assets/fonts/eb_garamond/EBGaramond-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "EB Garamond", serif;
+  src: url('assets/fonts/work_sans/EBGaramond-Italic-VariableFont_wght.ttf') format('truetype-variations');
+  font-weight: 400 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+// SYNE
+@font-face {
+  font-family: "Syne", serif;
+  src: url('assets/fonts/syne/Syne-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Syne", serif;
+  src: url('assets/fonts/syne/Syne-Regular.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Syne", serif;
+  src: url('assets/fonts/syne/Syne-Regular.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Syne", serif;
+  src: url('assets/fonts/syne/Syne-Regular.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Syne", serif;
+  src: url('assets/fonts/syne/Syne-Regular.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+

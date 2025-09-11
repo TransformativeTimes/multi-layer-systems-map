@@ -1,0 +1,81 @@
+@font-face {
+  font-family: "Work Sans", serif;
+  src: url("assets/fonts/work_sans/EBGaramond-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Work Sans", sans-serif;
+  src: url("assets/fonts/work_sans/WorkSans-Italic-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "EB Garamond", serif;
+  src: url("assets/fonts/eb_garamond/EBGaramond-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "EB Garamond", serif;
+  src: url("assets/fonts/work_sans/EBGaramond-Italic-VariableFont_wght.ttf") format("truetype-variations");
+  font-weight: 400 800;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Syne", serif;
+  src: url("assets/fonts/syne/Syne-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Syne", serif;
+  src: url("assets/fonts/syne/Syne-Regular.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Syne", serif;
+  src: url("assets/fonts/syne/Syne-Regular.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Syne", serif;
+  src: url("assets/fonts/syne/Syne-Regular.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Syne", serif;
+  src: url("assets/fonts/syne/Syne-Regular.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+.node-popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 400px;
+  border: solid 1px #7C868E;
+  border-radius: 10px;
+  padding: 10px;
+  background-color: #171717;
+  color: white;
+  z-index: 30;
+}
+.node-popup .close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}/*# sourceMappingURL=style.css.map */

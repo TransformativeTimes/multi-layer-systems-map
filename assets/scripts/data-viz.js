@@ -47,6 +47,7 @@ let animationStartTime = 0
 let userCameraAngle = 0
 let userCameraRadius = 25
 let userCameraY = 10
+let cameraTarget = new THREE.Vector3(0, 0, 0)
 
 // Lighting
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.9)
@@ -100,18 +101,15 @@ function fitCameraToLayers() {
   )
   
   camera.lookAt(center)
-
-  console.log(center)
-
-  console.log(camera.position)
   
   // Update animation variables to match the new camera position
   userCameraAngle = Math.atan2(camera.position.z - center.z, camera.position.x - center.x)
   userCameraRadius = Math.sqrt((camera.position.x - center.x) ** 2 + (camera.position.z - center.z) ** 2)
   userCameraY = camera.position.y
   
-  // Update orbit controls target
+  // Update orbit controls target and store it for animation
   controls.target.copy(center)
+  cameraTarget.copy(center)
   controls.update()
 }
 
@@ -223,11 +221,51 @@ function createConnections(data) {
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
+// Global variable to track the current popup
+let nodePopup = null
+let currentlyHighlightedSphere = null
+let currentlyHoveredSphere = null
+
+// Function to reset all sphere colors to original state
+function resetAllSphereColors() {
+  spheres.forEach(sphere => {
+    sphere.material.emissive.setHex(0xffffff)
+    sphere.material.color.set(0xffffff)
+  })
+  currentlyHighlightedSphere = null
+}
+
+// Function to handle sphere hover effects
+function handleSphereHover(hoveredSphere) {
+  // Reset previously hovered sphere if it's different and not currently highlighted
+  if (currentlyHoveredSphere && currentlyHoveredSphere !== hoveredSphere && currentlyHoveredSphere !== currentlyHighlightedSphere) {
+    currentlyHoveredSphere.material.emissive.setHex(0xffffff)
+    currentlyHoveredSphere.material.color.set(0xffffff)
+  }
+  
+  // Apply hover effect to new sphere (only if it's not already highlighted)
+  if (hoveredSphere && hoveredSphere !== currentlyHighlightedSphere) {
+    hoveredSphere.material.emissive.setHex(0x98DAFF)
+    hoveredSphere.material.color.set(0x98DAFF)
+  }
+  
+  currentlyHoveredSphere = hoveredSphere
+}
+
+// Function to reset hover effects
+function resetHoverEffects() {
+  if (currentlyHoveredSphere && currentlyHoveredSphere !== currentlyHighlightedSphere) {
+    currentlyHoveredSphere.material.emissive.setHex(0xffffff)
+    currentlyHoveredSphere.material.color.set(0xffffff)
+  }
+  currentlyHoveredSphere = null
+}
+
 // Load and process data
 async function loadData() {
   try {
     // Read the data.json file
-    const response = await fetch("template-data-2.json")
+    const response = await fetch("assets/data/template-data-2.json")
     const data = await response.json()
 
     // Create layer Y position mapping
@@ -302,22 +340,67 @@ function onMouseClick(event) {
   if (intersects.length > 0) {
     const clickedSphere = intersects[0].object
 
-    //console.log(clickedSphere.userData.title)
-    console.log("This node ID is: " + clickedSphere.userData.id)
+    // Remove existing popup if it exists
+    if (nodePopup) {
+      nodePopup.remove()
+      nodePopup = null
+    }
 
-    // Visual feedback - make sphere briefly glow
-    const originalEmissive = clickedSphere.material.emissive.getHex()
+    // Reset all sphere colors first
+    resetAllSphereColors()
 
-    clickedSphere.material.emissive.setHex(0x61B58A);
-    clickedSphere.material.color.set(0x6FD4A0)
-    setTimeout(() => {
-      clickedSphere.material.emissive.setHex(originalEmissive)
-    }, 500)
+    // Highlight the clicked sphere and store reference
+    clickedSphere.material.emissive.setHex(0x49B1EC)
+    clickedSphere.material.color.set(0x49B1EC)
+    currentlyHighlightedSphere = clickedSphere
+
+    // Create new popup
+    nodePopup = document.createElement('div')
+    nodePopup.className = 'node-popup'
+
+    nodePopup.innerHTML = `
+      <div class="close-btn">X</div>
+      <h1>${clickedSphere.userData.title}</h1>
+      <p>${clickedSphere.userData.description}</p>
+    `
+
+    document.body.appendChild(nodePopup)
+
+    // Add close button functionality
+    const closeBtn = nodePopup.querySelector('.close-btn')
+    closeBtn.addEventListener('click', () => {
+      nodePopup.remove()
+      nodePopup = null
+      // Reset sphere colors when popup closes
+      resetAllSphereColors()
+    })
   }
 }
 
-// Add event listener
+// Mouse move handler for hover effects
+function onMouseMove(event) {
+  // Calculate mouse position in normalized device coordinates
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1
+
+  // Update raycaster
+  raycaster.setFromCamera(mouse, camera)
+
+  // Check for intersections
+  const intersects = raycaster.intersectObjects(spheres)
+
+  if (intersects.length > 0) {
+    const hoveredSphere = intersects[0].object
+    handleSphereHover(hoveredSphere)
+  } else {
+    // No sphere is being hovered, reset hover effects
+    resetHoverEffects()
+  }
+}
+
+// Add event listeners
 window.addEventListener("click", onMouseClick)
+window.addEventListener("mousemove", onMouseMove)
 
 // Camera control event listeners
 controls.addEventListener('start', () => {
@@ -328,14 +411,20 @@ controls.addEventListener('start', () => {
 controls.addEventListener('end', () => {
   lastInteractionTime = Date.now()
   animationTimeout = setTimeout(() => {
-    // Calculate the current angle, radius, and Y position based on camera position
-    userCameraAngle = Math.atan2(camera.position.z, camera.position.x)
-    userCameraRadius = Math.sqrt(camera.position.x * camera.position.x + camera.position.z * camera.position.z)
+    // Calculate the current angle, radius, and Y position based on camera position relative to target
+    const targetX = cameraTarget.x
+    const targetZ = cameraTarget.z
+    userCameraAngle = Math.atan2(camera.position.z - targetZ, camera.position.x - targetX)
+    userCameraRadius = Math.sqrt((camera.position.x - targetX) * (camera.position.x - targetX) + (camera.position.z - targetZ) * (camera.position.z - targetZ))
     userCameraY = camera.position.y
     animationStartTime = Date.now()
     isUserControlling = false
-  }, 500) // Time to restart the camera rotation animation
+  }, 0) // Time to restart the camera rotation animation
 })
+
+
+
+
 
 // Handle window resize
 function onWindowResize() {
@@ -353,14 +442,14 @@ function animate() {
   // Update controls
   controls.update()
 
-  // Camera animation - rotate around x-axis only when user is not controlling
+  // Camera animation - rotate around target when user is not controlling
   if (!isUserControlling) {
-    const timeSinceStart = (Date.now() - animationStartTime) * 0.00015
+    const timeSinceStart = (Date.now() - animationStartTime) * 0.0001
     const currentAngle = userCameraAngle + (timeSinceStart * 0.5)
-    camera.position.x = Math.cos(currentAngle) * userCameraRadius
-    camera.position.z = Math.sin(currentAngle) * userCameraRadius
+    camera.position.x = cameraTarget.x + Math.cos(currentAngle) * userCameraRadius
+    camera.position.z = cameraTarget.z + Math.sin(currentAngle) * userCameraRadius
     camera.position.y = userCameraY
-    camera.lookAt(0, 0, 0)
+    camera.lookAt(cameraTarget)
   }
 
   // Slowly rotate all spheres
