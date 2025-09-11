@@ -9,7 +9,12 @@ const scene = new THREE.Scene()
 scene.background = new THREE.Color(0x171717)
 
 // Camera setup
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+// PERSPECTIVE CAMERA
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+// ORTHOGRAPHIC CAMERA
+//const camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000 );
+
 camera.position.set(0, 10, 20)
 camera.lookAt(0, 0, 0)
 
@@ -204,7 +209,7 @@ const mouse = new THREE.Vector2()
 async function loadData() {
   try {
     // Read the data.json file
-    const response = await fetch("data.json")
+    const response = await fetch("template-data-2.json")
     const data = await response.json()
 
     // Create layer Y position mapping
