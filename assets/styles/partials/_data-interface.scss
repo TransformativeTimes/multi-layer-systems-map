@@ -1,23 +1,192 @@
-@use 'variables' as *;
+@use "variables" as *;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
+  list-style: none;
+  font-family: $work-sans;
+  font-weight: 400;
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  color: $neutral-100;
+  background: $green-700;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  font-family: $work-sans;
+  font-size: 15px;
+  background-color: $neutral-200;
+}
+
+
+#canvas-container {
+  position: fixed;
+  width: calc(100vw - 300px);
+  height: calc(100vh - 20px);
+  top: 10px;
+  right: 10px;
+
+  canvas {
+      border-radius: $s-spacing;
+      border: solid 1px $neutral-500;
+  }
+
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// navigation
+////////////////////////////////////////////////////////////////////////////////
+
+
+.nav-container {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100vh;
+  top: 0px;
+  z-index: 40;
+  color: white;
+  padding: $s-spacing;
+  width: 290px;
+
+  ul.layers-container {
+    display: flex;
+    flex-direction: column;
+    gap: $s-spacing;
+    width: 100%;
+
+    li {
+      padding: $xs-spacing $s-spacing;
+      font-family: $garamond;
+      text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
+      font-size: 20px;
+      border: solid 1px $neutral-500;
+      border-radius: $xs-spacing;
+
+
+    }
+  }
+
+    ul.tags-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: $s-spacing;
+    width: 100%;
+
+    li {
+      width: fit-content;
+      padding: $xs-spacing $s-spacing;
+      font-family: monospace;
+      border: solid 1px $neutral-500;
+      border-radius: $xs-spacing;
+
+
+    }
+  }
+
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// region PopUp
+////////////////////////////////////////////////////////////////////////////////
 
 .node-popup {
   position: fixed;
-  top: $m-spacing;
-  right: $m-spacing;
-  width: 400px;
+  top: $l-spacing;
+  right: $l-spacing;
+  width: 80%;
+  max-width: 300px;
   border: solid 1px $neutral-700;
   border-radius: 10px;
   padding: $s-spacing;
-  background-color: $neutral-100;
+  background-color: $neutral-200;
   color: white;
   z-index: 30;
+
+  h1 {
+    font-family: $garamond;
+    font-weight: 400;
+    margin-top: 0;
+    text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
+    font-size: 25px;
+    padding-right: 50px;
+    padding-bottom: $s-spacing;
+    margin-bottom: $m-spacing;
+    border-bottom: solid 1px $neutral-700;
+  }
+
+  p {
+    margin-bottom: $l-spacing;
+    color: $neutral-700;
+  }
+
+  ul {
+    display: flex;
+    gap: $s-spacing;
+
+    li {
+      padding: $xs-spacing $s-spacing;
+      border: solid 1px $neutral-700;
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: monospace;
+    }
+
+
+  }
 
   .close-btn {
     position: absolute;
     top: $s-spacing;
     right: $s-spacing;
     cursor: pointer;
+    width: 20px;
+    height: 20px;
+
+    &:before,
+    &:after {
+      position: absolute;
+      left: 8px;
+      content: " ";
+      height: 24px;
+      width: 1px;
+      background-color: $neutral-700;
+      transition: all 100ms ease-in;
+    }
+    &:before {
+      transform: rotate(45deg);
+    }
+    &:after {
+      transform: rotate(-45deg);
+    }
+
+    &:hover:before,
+    &:hover:after {
+      background-color: white;
+    }
 
   }
-
 }
+
+
+
+
+
+
+

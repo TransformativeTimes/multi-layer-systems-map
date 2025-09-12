@@ -2,22 +2,22 @@
   "layers": [
     {
       "id": "layer_01",
-      "name": "Layer 1",
+      "name": "Present",
       "order": 0
     },
     {
       "id": "layer_02",
-      "name": "Layer 2",
+      "name": "Transitions",
       "order": 1
     },
     {
       "id": "layer_03",
-      "name": "Layer 3",
+      "name": "Future",
       "order": 2
     },
     {
       "id": "layer_04",
-      "name": "Layer 4",
+      "name": "Far Future",
       "order": 3
     }
   ],
@@ -26,7 +26,7 @@
       "id": "n0001",
       "layerId": "layer_01",
       "title": "L1 1",
-      "description": "Node description",
+      "description": "Node description <br><br> Node description <br><br> Node description",
       "tags": [
         "tag1",
         "tag2",
