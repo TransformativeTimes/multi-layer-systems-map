@@ -463,6 +463,7 @@ function onMouseClick(event) {
 
     document.body.appendChild(nodePopup)
 
+
     // Add close button functionality
     const closeBtn = nodePopup.querySelector(".close-btn")
     closeBtn.addEventListener("click", () => {
@@ -471,6 +472,14 @@ function onMouseClick(event) {
       // Reset sphere colors when popup closes
       resetAllSphereColors()
     })
+  } else {
+    // Clicked on canvas but not on any sphere - close popup if it exists
+    if (nodePopup) {
+      nodePopup.remove()
+      nodePopup = null
+      // Reset sphere colors when popup closes
+      resetAllSphereColors()
+    }
   }
 }
 
@@ -497,7 +506,7 @@ function onMouseMove(event) {
 }
 
 // Add event listeners
-window.addEventListener("click", onMouseClick)
+renderer.domElement.addEventListener("click", onMouseClick)
 window.addEventListener("mousemove", onMouseMove)
 
 // Camera control event listeners
