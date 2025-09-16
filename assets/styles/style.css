@@ -98,6 +98,8 @@ body {
   height: calc(100vh - 20px);
   top: 10px;
   right: 10px;
+  background-color: #171717;
+  border-radius: 10px;
 }
 #canvas-container canvas {
   border-radius: 10px;
@@ -120,9 +122,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: 100%;
+  width: auto;
 }
 .nav-container ul.layers-container li {
+  width: 100%;
   padding: 5px 10px;
   font-family: "EB Garamond", serif;
   text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
@@ -144,6 +147,51 @@ body {
   font-family: monospace;
   border: solid 1px #59636B;
   border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.nav-container ul.tags-container li:hover {
+  border-color: #7C868E;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+.nav-container ul.tags-container li.active {
+  border-color: #76E3AB;
+  background-color: rgba(118, 227, 171, 0.1);
+}
+
+.play-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  border: solid 1px #7C868E;
+  background-color: #171717;
+  cursor: pointer;
+  background-position: center;
+  background-size: 30%;
+  background-repeat: no-repeat;
+  transition: filter 150ms ease-in;
+}
+.play-btn:hover {
+  border-color: #7C868E;
+  background-color: rgba(255, 255, 255, 0.05);
+  filter: brightness(1.5);
+}
+.play-btn.playing {
+  background-image: url(/assets/images/paused.svg);
+}
+.play-btn.paused {
+  background-image: url(/assets/images/play.svg);
+}
+
+.sphere-tooltip {
+  color: white;
+  z-index: 50;
+  text-shadow: 0px 0px 3px rgba(23, 23, 23, 0.9);
+  font-size: 10px;
+  font-family: monospace;
 }
 
 .node-popup {

@@ -47,15 +47,7 @@ controls.touches = {
   TWO: THREE.TOUCH.DOLLY_PAN,
 }
 
-// Animation control variables
-let isUserControlling = false
-let lastInteractionTime = 0
-let animationTimeout
-let animationStartTime = 0
-let userCameraAngle = 0
-let userCameraRadius = 25
-let userCameraY = 10
-let cameraTarget = new THREE.Vector3(0, 0, 0)
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -72,15 +64,64 @@ scene.add(directionalLight)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// region Rendering nodes
+// region Global Variables
 ////////////////////////////////////////////////////////////////////////////////
+
+
+// Raycaster for click detection
+const raycaster = new THREE.Raycaster()
+const mouse = new THREE.Vector2()
+
+// Global variable to track the current popup
+let nodePopup = null
+let currentlyHighlightedSphere = null
+let currentlyHoveredSphere = null
+
+// Tooltip element for hover
+let sphereTooltip = null
+
+
+// navigation container
+const navContainer = document.createElement('div')
+navContainer.classList.add('nav-container')
+
+const playBtn = document.createElement('div')
+playBtn.classList.add('play-btn', 'playing')
+navContainer.appendChild(playBtn)
+
+
+// Animation control variables
+
+let animPlaying = true;
+
+let isUserControlling = false
+let lastInteractionTime = 0
+let animationTimeout
+let animationStartTime = 0
+let accumulatedTime = 0
+let userCameraAngle = 0
+let userCameraRadius = 25
+let userCameraY = 10
+let cameraTarget = new THREE.Vector3(0, 0, 0)
+
+
 
 // Array to store sphere meshes with their data
 const spheres = []
+
+// Active tags state management
+const activeTags = new Set()
 let sphereRadius = 0.25
 
 // Array to store connection lines
 const connections = []
+
+
+////////////////////////////////////////////////////////////////////////////////
+// region Rendering nodes
+////////////////////////////////////////////////////////////////////////////////
+
+
 
 // Function to calculate the bounding box of all spheres
 function calculateBoundingBox() {
@@ -228,30 +269,43 @@ function createConnections(data) {
 // region Hover Interaction
 ////////////////////////////////////////////////////////////////////////////////
 
-// Raycaster for click detection
-const raycaster = new THREE.Raycaster()
-const mouse = new THREE.Vector2()
+// Function to check if a sphere is connected to the highlighted sphere
+function isConnectedToHighlighted(sphere) {
+  if (!currentlyHighlightedSphere) return false
+  
+  if (sphere === currentlyHighlightedSphere) return true
+  
+  return connections.some((connection) => {
+    return (connection.userData.source === currentlyHighlightedSphere.userData.id && connection.userData.target === sphere.userData.id) ||
+           (connection.userData.target === currentlyHighlightedSphere.userData.id && connection.userData.source === sphere.userData.id)
+  })
+}
 
-// Global variable to track the current popup
-let nodePopup = null
-let currentlyHighlightedSphere = null
-let currentlyHoveredSphere = null
-
-// Function to reset all sphere colors to original state
+// Function to reset all sphere colors and opacity to original state
 function resetAllSphereColors() {
   spheres.forEach((sphere) => {
     sphere.material.emissive.setHex(0xffffff)
     sphere.material.color.set(0xffffff)
+    sphere.material.opacity = 1
+    sphere.material.transparent = false
   })
+  
+  // Reset connection opacity
+  connections.forEach((connection) => {
+    connection.material.opacity = 0.2
+  })
+  
   currentlyHighlightedSphere = null
 }
 
 // Function to handle sphere hover effects
-function handleSphereHover(hoveredSphere) {
+function handleSphereHover(hoveredSphere, mouseX, mouseY) {
   // Reset previously hovered sphere if it's different and not currently highlighted
   if (currentlyHoveredSphere && currentlyHoveredSphere !== hoveredSphere && currentlyHoveredSphere !== currentlyHighlightedSphere) {
-    currentlyHoveredSphere.material.emissive.setHex(0xffffff)
-    currentlyHoveredSphere.material.color.set(0xffffff)
+    // Determine the correct reset color based on whether a sphere is clicked
+    const resetColor = currentlyHighlightedSphere && !isConnectedToHighlighted(currentlyHoveredSphere) ? 0x464D52 : 0xffffff
+    currentlyHoveredSphere.material.emissive.setHex(resetColor)
+    currentlyHoveredSphere.material.color.set(resetColor)
   }
 
   // Apply hover effect to new sphere (only if it's not already highlighted)
@@ -261,15 +315,47 @@ function handleSphereHover(hoveredSphere) {
   }
 
   currentlyHoveredSphere = hoveredSphere
+  
+  // Show tooltip
+  showTooltip(hoveredSphere, mouseX, mouseY)
 }
 
 // Function to reset hover effects
 function resetHoverEffects() {
   if (currentlyHoveredSphere && currentlyHoveredSphere !== currentlyHighlightedSphere) {
-    currentlyHoveredSphere.material.emissive.setHex(0xffffff)
-    currentlyHoveredSphere.material.color.set(0xffffff)
+    // Determine the correct reset color based on whether a sphere is clicked
+    const resetColor = currentlyHighlightedSphere && !isConnectedToHighlighted(currentlyHoveredSphere) ? 0x464D52 : 0xffffff
+    currentlyHoveredSphere.material.emissive.setHex(resetColor)
+    currentlyHoveredSphere.material.color.set(resetColor)
   }
   currentlyHoveredSphere = null
+  
+  // Hide tooltip
+  hideTooltip()
+}
+
+// Function to create and show tooltip
+function showTooltip(sphere, mouseX, mouseY) {
+  if (!sphereTooltip) {
+    sphereTooltip = document.createElement('p')
+    sphereTooltip.className = 'sphere-tooltip'
+    sphereTooltip.style.position = 'fixed'
+    sphereTooltip.style.pointerEvents = 'none'
+    sphereTooltip.style.zIndex = '1000'
+    document.body.appendChild(sphereTooltip)
+  }
+  
+  sphereTooltip.textContent = sphere.userData.title
+  sphereTooltip.style.left = mouseX + 10 + 'px'
+  sphereTooltip.style.top = mouseY - 25 + 'px'
+  sphereTooltip.style.display = 'block'
+}
+
+// Function to hide tooltip
+function hideTooltip() {
+  if (sphereTooltip) {
+    sphereTooltip.style.display = 'none'
+  }
 }
 
 
@@ -353,11 +439,47 @@ async function loadData() {
 
 
 
+// Function to update sphere visibility based on active tags
+function updateSphereVisibility() {
+  spheres.forEach(sphere => {
+    const nodeTags = sphere.userData.tags || []
+    
+    if (activeTags.size === 0) {
+      // If no tags are active, show all spheres
+      sphere.visible = true
+    } else {
+      // Check if sphere has any active tag
+      const hasActiveTag = nodeTags.some(tag => activeTags.has(tag))
+      sphere.visible = hasActiveTag
+    }
+  })
+  
+  // Also update connection visibility
+  connections.forEach(connection => {
+    const sourceSphere = spheres.find(sphere => sphere.userData.id === connection.userData.source)
+    const targetSphere = spheres.find(sphere => sphere.userData.id === connection.userData.target)
+    
+    // Show connection only if both spheres are visible
+    connection.visible = sourceSphere?.visible && targetSphere?.visible
+  })
+}
+
+// Function to toggle tag active state
+function toggleTag(tag, tagElement) {
+  if (activeTags.has(tag)) {
+    activeTags.delete(tag)
+    tagElement.classList.remove('active')
+  } else {
+    activeTags.add(tag)
+    tagElement.classList.add('active')
+  }
+  
+  updateSphereVisibility()
+}
+
 function navigation(data) {
 
   // Draw all layers
-  const navContainer = document.createElement('div')
-  navContainer.classList.add('nav-container')
 
   const layersUl = document.createElement('ul')
   layersUl.classList.add('layers-container')
@@ -390,6 +512,12 @@ function navigation(data) {
   uniqueTags.forEach(tag => {
     let li = document.createElement('li')
     li.innerHTML = tag
+    li.classList.add('tag-item')
+    
+    // Add click event listener to toggle tag
+    li.addEventListener('click', () => {
+      toggleTag(tag, li)
+    })
 
     tagsUl.appendChild(li)
   })
@@ -434,6 +562,35 @@ function onMouseClick(event) {
     // Reset all sphere colors first
     resetAllSphereColors()
 
+    // Find all connected spheres
+    const connectedSphereIds = new Set()
+    connectedSphereIds.add(clickedSphere.userData.id) // Include the clicked sphere
+    
+    connections.forEach((connection) => {
+      if (connection.userData.source === clickedSphere.userData.id) {
+        connectedSphereIds.add(connection.userData.target)
+      }
+      if (connection.userData.target === clickedSphere.userData.id) {
+        connectedSphereIds.add(connection.userData.source)
+      }
+    })
+
+    // Change color of unconnected spheres to red
+    spheres.forEach((sphere) => {
+      if (!connectedSphereIds.has(sphere.userData.id)) {
+        sphere.material.emissive.setHex(0x464D52)
+        sphere.material.color.set(0x464D52)
+      }
+    })
+
+    // Reduce opacity of connections not involving the clicked sphere
+    connections.forEach((connection) => {
+      if (connection.userData.source !== clickedSphere.userData.id && 
+          connection.userData.target !== clickedSphere.userData.id) {
+        connection.material.opacity = 0.02
+      }
+    })
+
     // Highlight the clicked sphere and store reference
     clickedSphere.material.emissive.setHex(0x6FD4A0)
     clickedSphere.material.color.set(0x6FD4A0)
@@ -472,15 +629,16 @@ function onMouseClick(event) {
       // Reset sphere colors when popup closes
       resetAllSphereColors()
     })
-  } else {
-    // Clicked on canvas but not on any sphere - close popup if it exists
-    if (nodePopup) {
-      nodePopup.remove()
-      nodePopup = null
-      // Reset sphere colors when popup closes
-      resetAllSphereColors()
-    }
-  }
+  } 
+  // else {
+  //   // Clicked on canvas but not on any sphere - close popup if it exists
+  //   if (nodePopup) {
+  //     nodePopup.remove()
+  //     nodePopup = null
+  //     // Reset sphere colors when popup closes
+  //     resetAllSphereColors()
+  //   }
+  // }
 }
 
 // Mouse move handler for hover effects
@@ -498,10 +656,12 @@ function onMouseMove(event) {
 
   if (intersects.length > 0) {
     const hoveredSphere = intersects[0].object
-    handleSphereHover(hoveredSphere)
+    handleSphereHover(hoveredSphere, event.clientX, event.clientY)
+    container.style.cursor = 'pointer'
   } else {
     // No sphere is being hovered, reset hover effects
     resetHoverEffects()
+    container.style.cursor = 'default'
   }
 }
 
@@ -525,6 +685,10 @@ controls.addEventListener("end", () => {
     userCameraRadius = Math.sqrt((camera.position.x - targetX) * (camera.position.x - targetX) + (camera.position.z - targetZ) * (camera.position.z - targetZ))
     userCameraY = camera.position.y
     animationStartTime = Date.now()
+    // Only reset accumulated time if animation is playing, preserve it if paused
+    if (animPlaying) {
+      accumulatedTime = 0
+    }
     isUserControlling = false
   }, 0) // Time to restart the camera rotation animation
 })
@@ -536,12 +700,22 @@ controls.addEventListener("end", () => {
 
 // Handle window resize
 function onWindowResize() {
-  const width = container.clientWidth
-  const height = container.clientHeight
-  camera.aspect = width / height
-  camera.updateProjectionMatrix()
-  renderer.setSize(width, height)
-  composer.setSize(width, height)
+  // Update canvas container width based on fullscreen state
+  if (isFullscreen) {
+    canvasContainer.style.width = 'calc(100vw - 20px)'
+  } else {
+    canvasContainer.style.width = 'calc(100vw - 300px)'
+  }
+  
+  // Wait for DOM to update before reading new dimensions
+  requestAnimationFrame(() => {
+    const width = container.clientWidth
+    const height = container.clientHeight
+    camera.aspect = width / height
+    camera.updateProjectionMatrix()
+    renderer.setSize(width, height)
+    composer.setSize(width, height)
+  })
 }
 window.addEventListener("resize", onWindowResize)
 
@@ -551,6 +725,41 @@ window.addEventListener("resize", onWindowResize)
 // region Animation
 ////////////////////////////////////////////////////////////////////////////////
 
+
+playBtn.addEventListener('click', function() {
+
+  if(animPlaying){
+    // Pausing - capture current accumulated time
+    if (!isUserControlling) {
+      const currentTime = (Date.now() - animationStartTime) * 0.0001
+      accumulatedTime += currentTime
+    }
+    animPlaying = false;
+        this.classList.remove('playing');
+    this.classList.add('paused');
+
+
+  } else {
+    // Resuming - capture current camera position and reset accumulated time
+    const targetX = cameraTarget.x
+    const targetZ = cameraTarget.z
+    userCameraAngle = Math.atan2(camera.position.z - targetZ, camera.position.x - targetX)
+    userCameraRadius = Math.sqrt((camera.position.x - targetX) * (camera.position.x - targetX) + (camera.position.z - targetZ) * (camera.position.z - targetZ))
+    userCameraY = camera.position.y
+    animationStartTime = Date.now()
+    accumulatedTime = 0  // Reset accumulated time to start fresh from current position
+    animPlaying = true;
+
+    this.classList.remove('paused');
+    this.classList.add('playing');
+  }
+  
+  
+});
+
+
+
+
 // Animation loop
 function animate() {
   requestAnimationFrame(animate)
@@ -559,18 +768,76 @@ function animate() {
   controls.update()
 
   // Camera animation - rotate around target when user is not controlling
-  if (!isUserControlling) {
-    const timeSinceStart = (Date.now() - animationStartTime) * 0.0001
-    const currentAngle = userCameraAngle + timeSinceStart * 0.5
-    camera.position.x = cameraTarget.x + Math.cos(currentAngle) * userCameraRadius
-    camera.position.z = cameraTarget.z + Math.sin(currentAngle) * userCameraRadius
-    camera.position.y = userCameraY
-    camera.lookAt(cameraTarget)
-  }
+
+  if(animPlaying){
+      if (!isUserControlling) {
+        const currentSessionTime = (Date.now() - animationStartTime) * 0.0001
+        const totalTime = accumulatedTime + currentSessionTime
+        const currentAngle = userCameraAngle + totalTime * 0.5
+        camera.position.x = cameraTarget.x + Math.cos(currentAngle) * userCameraRadius
+        camera.position.z = cameraTarget.z + Math.sin(currentAngle) * userCameraRadius
+        camera.position.y = userCameraY
+        camera.lookAt(cameraTarget)
+    }
+  } 
 
 
   composer.render()
 }
+
+// Fullscreen toggle functionality
+let isFullscreen = false
+const canvasContainer = document.getElementById('canvas-container')
+
+function toggleFullscreen() {
+  if (isFullscreen) {
+    // Return to normal view
+    canvasContainer.style.width = 'calc(100vw - 300px)'
+    canvasContainer.style.display = 'block'
+    isFullscreen = false
+
+    navContainer.style.display = 'flex'
+  } else {
+    // Go to fullscreen
+    canvasContainer.style.width = 'calc(100vw - 20px)'
+    canvasContainer.style.display = 'block'
+    isFullscreen = true
+
+    navContainer.style.display = 'none'
+  }
+
+  // Smoothly resize canvas during transition
+  let animationId
+  const startTime = performance.now()
+  const transitionDuration = 200 // Match CSS transition duration
+  
+  const smoothResize = (currentTime) => {
+    const elapsed = currentTime - startTime
+    
+    // Update renderer size continuously during fullscreen transition only
+    const width = canvasContainer.clientWidth
+    const height = canvasContainer.clientHeight
+    camera.aspect = width / height
+    camera.updateProjectionMatrix()
+    renderer.setSize(width, height)
+    composer.setSize(width, height)
+    
+    // Continue animation until transition is complete
+    if (elapsed < transitionDuration) {
+      animationId = requestAnimationFrame(smoothResize)
+    }
+  }
+  
+  // Start smooth resize animation
+  animationId = requestAnimationFrame(smoothResize)
+}
+
+// Add keyboard event listener for 'f' key
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'f' || event.key === 'F') {
+    toggleFullscreen()
+  }
+})
 
 // Initialize
 loadData()
