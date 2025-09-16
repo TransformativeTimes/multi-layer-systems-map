@@ -806,30 +806,13 @@ function toggleFullscreen() {
     navContainer.style.display = 'none'
   }
 
-  // Smoothly resize canvas during transition
-  let animationId
-  const startTime = performance.now()
-  const transitionDuration = 200 // Match CSS transition duration
-  
-  const smoothResize = (currentTime) => {
-    const elapsed = currentTime - startTime
-    
-    // Update renderer size continuously during fullscreen transition only
-    const width = canvasContainer.clientWidth
-    const height = canvasContainer.clientHeight
-    camera.aspect = width / height
-    camera.updateProjectionMatrix()
-    renderer.setSize(width, height)
-    composer.setSize(width, height)
-    
-    // Continue animation until transition is complete
-    if (elapsed < transitionDuration) {
-      animationId = requestAnimationFrame(smoothResize)
-    }
-  }
-  
-  // Start smooth resize animation
-  animationId = requestAnimationFrame(smoothResize)
+  const width = canvasContainer.clientWidth
+  const height = canvasContainer.clientHeight
+  camera.aspect = width / height
+  camera.updateProjectionMatrix()
+  renderer.setSize(width, height)
+  composer.setSize(width, height)
+
 }
 
 // Add keyboard event listener for 'f' key
