@@ -85,21 +85,30 @@ body {
       width: 100%;
       border: solid 1px $neutral-500;
       border-radius: $xs-spacing;
-      padding: $xs-spacing $s-spacing;
       height: 40px;
       overflow: hidden;
       transition: all 250ms ease-in-out;
+      position: relative;
+      padding: 0 $s-spacing 0 $s-spacing;
+      
 
       &:hover {
         background-color: $neutral-300;
+                
+        h2 {
+          background-color: $neutral-300;
+        }
       }
 
       &.active {
         //height: fit-content;
         background-color: $neutral-300;
         height: 50vh;
-        padding: $xs-spacing $s-spacing 0 $s-spacing;
+        overflow: scroll;
 
+        h2 {
+          background-color: $neutral-300;
+          }
       }
 
       h2 {
@@ -107,15 +116,21 @@ body {
         text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
         font-size: 20px;
         padding-bottom: 7px;
+        padding-top: 5px;
         cursor: pointer;
         border-bottom: solid 1px $neutral-500;
         user-select: none;
+        position: sticky;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: $neutral-200;
+        z-index: 20;
+        transition: all 250ms ease-in-out;
 
       }
 
       ul {
-        overflow: scroll;
-        //height: calc(100% - 40px);
         height: fit-content;
         padding-bottom: $m-spacing;
         position: relative;
@@ -290,6 +305,7 @@ body {
       border-radius: 5px;
       font-size: 13px;
       font-family: monospace;
+      pointer-events: none;
     }
 
 
