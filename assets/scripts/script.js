@@ -116,6 +116,8 @@ let sphereRadius = 0.25
 
 // Array to store connection lines
 const connections = []
+// Array to store connection materials for animation
+const connectionMaterials = []
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -242,25 +244,24 @@ function createConnections(data) {
       // Create bezier curve with layer spacing
       const curve = createBezierCurve(sourceSphere.position, targetSphere.position, layerSpacing)
 
-      // Create geometry from curve
-      const points = curve.getPoints(50) // 50 points for smooth curve
-      const geometry = new THREE.BufferGeometry().setFromPoints(points)
-
-      // Create material for the line
-      const material = new THREE.LineBasicMaterial({
+      // Create tube geometry from curve for proper shader support
+      const tubeGeometry = new THREE.TubeGeometry(curve, 50, 0.02, 8, false)
+      
+      // Create simple solid green material
+      const material = new THREE.MeshBasicMaterial({
         color: 0x76e3ab,
         opacity: 0.2,
-        transparent: true,
-        linewidth: 2,
+        transparent: true
       })
 
-      // Create the line
-      const line = new THREE.Line(geometry, material)
+      // Create the mesh (instead of line)
+      const line = new THREE.Mesh(tubeGeometry, material)
       line.userData = connection
 
       // Add to scene and connections array
       scene.add(line)
       connections.push(line)
+      connectionMaterials.push(material)
     }
   })
 }
@@ -383,6 +384,9 @@ function hideTooltip() {
 // Load and process data
 async function loadData() {
   try {
+    // Clear existing arrays
+    connectionMaterials.length = 0
+    
     // Read the data.json file
     const response = await fetch("assets/data/template-data-2.json")
     const data = await response.json()
@@ -907,7 +911,7 @@ function toggleFullscreen() {
 
 }
 
-// Add keyboard event listener for 'f' key and spacebar
+// Add keyboard event listener for 'f' key, spacebar, and ESC key
 document.addEventListener('keydown', (event) => {
   if (event.key === 'f' || event.key === 'F') {
     toggleFullscreen()
@@ -937,6 +941,18 @@ document.addEventListener('keydown', (event) => {
       
       playBtn.classList.remove('paused')
       playBtn.classList.add('playing')
+    }
+  } else if (event.key === 'Escape') {
+    // Close open sphere popup if it exists
+    if (nodePopup) {
+      nodePopup.remove()
+      nodePopup = null
+      // Reset sphere colors when popup closes
+      resetAllSphereColors()
+      // Remove active class from all li elements when popup closes
+      document.querySelectorAll('.layer-container ul li').forEach(liItem => {
+        liItem.classList.remove('active')
+      })
     }
   }
 })
@@ -985,6 +1001,14 @@ function animate() {
   requestAnimationFrame(animate)
 
   controls.update()
+
+  // Update connection line animations
+  const time = Date.now() * 0.001
+  connectionMaterials.forEach(material => {
+    if (material.uniforms && material.uniforms.time) {
+      material.uniforms.time.value = time
+    }
+  })
 
   // Camera animation - rotate around target when user is not controlling
   if(animPlaying){
