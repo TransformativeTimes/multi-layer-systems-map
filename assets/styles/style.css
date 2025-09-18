@@ -110,7 +110,6 @@ body {
   position: fixed;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   height: 100vh;
   top: 0px;
   z-index: 40;
@@ -123,6 +122,15 @@ body {
   flex-direction: column;
   gap: 10px;
   width: auto;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: solid 1px #59636B;
+}
+.nav-container .layers-wrap.has-active-item .layer-container ul li {
+  color: #7C868E !important;
+}
+.nav-container .layers-wrap.has-active-item .layer-container ul li.active {
+  color: #76E3AB !important;
 }
 .nav-container .layers-wrap .layer-container {
   width: 100%;
@@ -131,9 +139,13 @@ body {
   padding: 5px 10px;
   height: 40px;
   overflow: hidden;
-  transition: height 150ms ease-in-out;
+  transition: all 250ms ease-in-out;
+}
+.nav-container .layers-wrap .layer-container:hover {
+  background-color: #353A3D;
 }
 .nav-container .layers-wrap .layer-container.active {
+  background-color: #353A3D;
   height: 50vh;
   padding: 5px 10px 0 10px;
 }
@@ -143,11 +155,12 @@ body {
   font-size: 20px;
   padding-bottom: 7px;
   cursor: pointer;
-  border-bottom: solid 1px #7C868E;
+  border-bottom: solid 1px #59636B;
 }
 .nav-container .layers-wrap .layer-container ul {
   overflow: scroll;
-  height: calc(100% - 40px);
+  height: -moz-fit-content;
+  height: fit-content;
   padding-bottom: 20px;
   position: relative;
   padding-top: 10px;
@@ -159,8 +172,16 @@ body {
   width: fit-content;
   font-family: monospace;
   font-size: 13px;
+  transition: all 150ms ease-out;
+  position: relative;
+  color: #F5F7F9;
+}
+.nav-container .layers-wrap .layer-container ul li:hover {
+  opacity: 1;
+  color: #C1FFE1 !important;
 }
 .nav-container .layers-wrap .layer-container ul li.active {
+  text-shadow: 0px 0px 3px rgba(118, 227, 171, 0.5);
   color: #76E3AB;
 }
 .nav-container ul.tags-container {
@@ -185,8 +206,8 @@ body {
   background-color: rgba(255, 255, 255, 0.05);
 }
 .nav-container ul.tags-container li.active {
-  border-color: #76E3AB;
-  background-color: rgba(118, 227, 171, 0.1);
+  border-color: #DCE0E3;
+  background-color: #464D52;
 }
 
 .play-btn {
@@ -196,7 +217,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 20px;
-  border: solid 1px #7C868E;
+  border: solid 1px #59636B;
   background-color: #171717;
   cursor: pointer;
   background-position: center;
@@ -233,7 +254,7 @@ body {
   border: solid 1px #7C868E;
   border-radius: 10px;
   padding: 10px;
-  background-color: #26282A;
+  background-color: #353A3D;
   color: white;
   z-index: 30;
 }
@@ -250,7 +271,7 @@ body {
 }
 .node-popup p {
   margin-bottom: 40px;
-  color: #7C868E;
+  color: #C4CACE;
 }
 .node-popup ul {
   display: flex;

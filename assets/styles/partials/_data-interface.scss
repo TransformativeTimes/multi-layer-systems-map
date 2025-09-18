@@ -56,7 +56,6 @@ body {
   position: fixed;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   height: 100vh;
   top: 0px;
   z-index: 40;
@@ -69,6 +68,18 @@ body {
     flex-direction: column;
     gap: $s-spacing;
     width: auto;
+    padding-bottom: $m-spacing;
+    margin-bottom: $m-spacing;
+    border-bottom: solid 1px $neutral-500;
+
+    // When any li has active class, all non-active li should be neutral-700
+    &.has-active-item .layer-container ul li {
+      color: $neutral-700 !important;
+      
+      &.active {
+        color: $green-700 !important;
+      }
+    }
 
     .layer-container {
       width: 100%;
@@ -77,10 +88,15 @@ body {
       padding: $xs-spacing $s-spacing;
       height: 40px;
       overflow: hidden;
-      transition: height 150ms ease-in-out;
+      transition: all 250ms ease-in-out;
+
+      &:hover {
+        background-color: $neutral-300;
+      }
 
       &.active {
         //height: fit-content;
+        background-color: $neutral-300;
         height: 50vh;
         padding: $xs-spacing $s-spacing 0 $s-spacing;
 
@@ -92,19 +108,17 @@ body {
         font-size: 20px;
         padding-bottom: 7px;
         cursor: pointer;
-        border-bottom: solid 1px $neutral-700;
+        border-bottom: solid 1px $neutral-500;
 
       }
 
       ul {
         overflow: scroll;
-        height: calc(100% - 40px);
+        //height: calc(100% - 40px);
+        height: fit-content;
         padding-bottom: $m-spacing;
         position: relative;
         padding-top: $s-spacing;
-
-
-
 
         li {
           margin-bottom: $xs-spacing;
@@ -112,12 +126,25 @@ body {
           width: fit-content;
           font-family: monospace;
           font-size: 13px;
+          transition: all 150ms ease-out;
+          position: relative;
+          color: $neutral-1200;
+
+          &:hover {
+            opacity: 1;
+            color: $green-900 !important;
+          }
 
           &.active {
+            // color: white;
+            //text-shadow: 0px 0px 3px rgba(255, 255, 255, 0.9);
+            text-shadow: 0px 0px 3px rgba(118, 227, 171, 0.5);
             color: $green-700;
           }
 
+      
         }
+
 
       }
 
@@ -125,7 +152,7 @@ body {
     }
   }
 
-    ul.tags-container {
+  ul.tags-container {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -147,8 +174,8 @@ body {
       }
 
       &.active {
-        border-color: #76E3AB;
-        background-color: rgba(118, 227, 171, 0.1);
+        border-color: $neutral-1100;
+        background-color: $neutral-400;
       }
 
     }
@@ -167,7 +194,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 20px;
-  border: solid 1px $neutral-700;
+  border: solid 1px $neutral-500;
   background-color: $neutral-100;
   cursor: pointer;
   background-position: center;
@@ -215,7 +242,7 @@ body {
   border: solid 1px $neutral-700;
   border-radius: 10px;
   padding: $s-spacing;
-  background-color: $neutral-200;
+  background-color: $neutral-300;
   color: white;
   z-index: 30;
 
@@ -233,7 +260,7 @@ body {
 
   p {
     margin-bottom: $l-spacing;
-    color: $neutral-700;
+    color: $neutral-1000;
   }
 
   ul {

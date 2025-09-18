@@ -114,10 +114,28 @@ const spheres = []
 const activeTags = new Set()
 let sphereRadius = 0.25
 
+// Function to update li color behavior based on active state
+function updateLiColorBehavior() {
+  const layersWrap = document.querySelector('.layers-wrap')
+  if (!layersWrap) {
+    return
+  }
+  
+  const hasActiveItem = document.querySelector('.layer-container ul li.active') !== null
+  
+  if (hasActiveItem) {
+    layersWrap.classList.add('has-active-item')
+  } else {
+    layersWrap.classList.remove('has-active-item')
+  }
+}
+
 // Array to store connection lines
 const connections = []
 // Array to store connection materials for animation
 const connectionMaterials = []
+// Array to store flow particles
+const flowParticles = []
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -250,7 +268,7 @@ function createConnections(data) {
       // Create simple solid green material
       const material = new THREE.MeshBasicMaterial({
         color: 0x76e3ab,
-        opacity: 0.2,
+        opacity: 0.1,
         transparent: true
       })
 
@@ -262,8 +280,44 @@ function createConnections(data) {
       scene.add(line)
       connections.push(line)
       connectionMaterials.push(material)
+
+      // Create flow particles for this connection
+      createFlowParticles(curve, connection)
     }
   })
+}
+
+// Function to create flow particles for a connection
+function createFlowParticles(curve, connection) {
+  const particleCount = 10 // Number of particles per tube
+  const particleGeometry = new THREE.SphereGeometry(0.015, 8, 6)
+  
+  for (let i = 0; i < particleCount; i++) {
+    // Create glowing particle material
+    const particleMaterial = new THREE.MeshPhongMaterial({
+      color: 0x00ff88,
+      emissive: 0x00ff88,
+      emissiveIntensity: 0.5
+    })
+    
+    const particle = new THREE.Mesh(particleGeometry, particleMaterial)
+    
+    // Store particle data
+    const particleData = {
+      mesh: particle,
+      curve: curve,
+      progress: i / particleCount, // Stagger particles along the curve
+      speed: 0.05  , // Movement speed
+      connection: connection
+    }
+    
+    // Position particle at initial progress
+    const position = curve.getPointAt(particleData.progress)
+    particle.position.copy(position)
+    
+    scene.add(particle)
+    flowParticles.push(particleData)
+  }
 }
 
 
@@ -386,6 +440,7 @@ async function loadData() {
   try {
     // Clear existing arrays
     connectionMaterials.length = 0
+    flowParticles.length = 0
     
     // Read the data.json file
     const response = await fetch("assets/data/template-data-2.json")
@@ -480,6 +535,15 @@ function updateSphereVisibility() {
     connection.visible = sourceSphere?.visible && targetSphere?.visible
   })
   
+  // Update flow particle visibility based on connection visibility
+  flowParticles.forEach(particleData => {
+    const sourceSphere = spheres.find(sphere => sphere.userData.id === particleData.connection.source)
+    const targetSphere = spheres.find(sphere => sphere.userData.id === particleData.connection.target)
+    
+    // Show particle only if both spheres are visible
+    particleData.mesh.visible = sourceSphere?.visible && targetSphere?.visible
+  })
+  
   // Update nodesList items visibility based on active tags
   document.querySelectorAll('.layer-container ul li').forEach(li => {
     // Find the corresponding sphere to get node data
@@ -568,6 +632,7 @@ function navigation(data) {
               nodePopup = null
             }
             resetAllSphereColors()
+            updateLiColorBehavior()
           } else {
             handleNodeSelection(node)
             // Remove active class from all li elements in all nodesLists
@@ -575,6 +640,7 @@ function navigation(data) {
               liItem.classList.remove('active')
             })
             li.classList.add('active')
+            updateLiColorBehavior()
           }
         })
         
@@ -699,6 +765,9 @@ function handleNodeSelection(nodeData) {
   if (correspondingLi) {
     correspondingLi.classList.add('active')
   }
+  
+  // Update li color behavior
+  updateLiColorBehavior()
 
   // Find all connected spheres
   const connectedSphereIds = new Set()
@@ -769,6 +838,8 @@ function handleNodeSelection(nodeData) {
     if (correspondingLi) {
       correspondingLi.classList.remove('active')
     }
+    // Update li color behavior
+    updateLiColorBehavior()
   })
 }
 
@@ -953,6 +1024,8 @@ document.addEventListener('keydown', (event) => {
       document.querySelectorAll('.layer-container ul li').forEach(liItem => {
         liItem.classList.remove('active')
       })
+      // Update li color behavior
+      updateLiColorBehavior()
     }
   }
 })
@@ -1002,12 +1075,20 @@ function animate() {
 
   controls.update()
 
-  // Update connection line animations
-  const time = Date.now() * 0.001
-  connectionMaterials.forEach(material => {
-    if (material.uniforms && material.uniforms.time) {
-      material.uniforms.time.value = time
+  // Update flow particles
+  const deltaTime = 0.016 // Approximate 60fps
+  flowParticles.forEach(particleData => {
+    // Move particle along curve
+    particleData.progress += particleData.speed * deltaTime
+    
+    // Reset to beginning when reaching end
+    if (particleData.progress > 1.0) {
+      particleData.progress = 0.0
     }
+    
+    // Update particle position
+    const position = particleData.curve.getPointAt(particleData.progress)
+    particleData.mesh.position.copy(position)
   })
 
   // Camera animation - rotate around target when user is not controlling
