@@ -76,6 +76,7 @@ const mouse = new THREE.Vector2()
 let nodePopup = null
 let currentlyHighlightedSphere = null
 let currentlyHoveredSphere = null
+let isHoveringLiElement = false
 
 // Tooltip element for hover
 let sphereTooltip = null
@@ -298,8 +299,13 @@ function resetAllSphereColors() {
   currentlyHighlightedSphere = null
 }
 
-// Function to handle sphere hover effects
-function handleSphereHover(hoveredSphere, mouseX, mouseY) {
+// Function to handle node hover effects (works with both spheres and li elements)
+function handleNodeHover(nodeData, mouseX, mouseY, showTooltipFlag = true) {
+  // Find the corresponding sphere
+  const hoveredSphere = spheres.find(sphere => sphere.userData.id === nodeData.id)
+  
+  if (!hoveredSphere) return
+
   // Reset previously hovered sphere if it's different and not currently highlighted
   if (currentlyHoveredSphere && currentlyHoveredSphere !== hoveredSphere && currentlyHoveredSphere !== currentlyHighlightedSphere) {
     // Determine the correct reset color based on whether a sphere is clicked
@@ -316,8 +322,15 @@ function handleSphereHover(hoveredSphere, mouseX, mouseY) {
 
   currentlyHoveredSphere = hoveredSphere
   
-  // Show tooltip
-  showTooltip(hoveredSphere, mouseX, mouseY)
+  // Show tooltip only if requested
+  if (showTooltipFlag) {
+    showTooltip(hoveredSphere, mouseX, mouseY)
+  }
+}
+
+// Function to handle sphere hover effects (legacy wrapper for backward compatibility)
+function handleSphereHover(hoveredSphere, mouseX, mouseY) {
+  handleNodeHover(hoveredSphere.userData, mouseX, mouseY)
 }
 
 // Function to reset hover effects
@@ -462,6 +475,26 @@ function updateSphereVisibility() {
     // Show connection only if both spheres are visible
     connection.visible = sourceSphere?.visible && targetSphere?.visible
   })
+  
+  // Update nodesList items visibility based on active tags
+  document.querySelectorAll('.layer-container ul li').forEach(li => {
+    // Find the corresponding sphere to get node data
+    const nodeTitle = li.textContent.trim()
+    const correspondingSphere = spheres.find(sphere => sphere.userData.title === nodeTitle)
+    
+    if (correspondingSphere) {
+      const nodeTags = correspondingSphere.userData.tags || []
+      
+      if (activeTags.size === 0) {
+        // If no tags are active, show all li elements
+        li.style.display = 'block'
+      } else {
+        // Check if node has any active tag
+        const hasActiveTag = nodeTags.some(tag => activeTags.has(tag))
+        li.style.display = hasActiveTag ? 'block' : 'none'
+      }
+    }
+  })
 }
 
 // Function to toggle tag active state
@@ -519,6 +552,39 @@ function navigation(data) {
       .forEach(node => {
         const li = document.createElement('li')
         li.textContent = node.title
+        li.style.cursor = 'pointer'
+        
+        // Add click event listener to trigger the same functionality as sphere clicks
+        li.addEventListener('click', () => {
+          if (li.classList.contains('active')) {
+            li.classList.remove('active')
+            // Reset sphere colors and close popup when deactivating
+            if (nodePopup) {
+              nodePopup.remove()
+              nodePopup = null
+            }
+            resetAllSphereColors()
+          } else {
+            handleNodeSelection(node)
+            // Remove active class from all li elements in all nodesLists
+            document.querySelectorAll('.layer-container ul li').forEach(liItem => {
+              liItem.classList.remove('active')
+            })
+            li.classList.add('active')
+          }
+        })
+        
+        // Add hover event listeners to trigger sphere hover effects
+        li.addEventListener('mouseenter', (event) => {
+          isHoveringLiElement = true
+          handleNodeHover(node, event.clientX, event.clientY, false)
+        })
+        
+        li.addEventListener('mouseleave', () => {
+          isHoveringLiElement = false
+          resetHoverEffects()
+        })
+        
         nodesList.appendChild(li)
       })
 
@@ -578,6 +644,130 @@ function navigation(data) {
 // region Mouse click events
 ////////////////////////////////////////////////////////////////////////////////
 
+// Function to handle node selection (used by both sphere clicks and li clicks)
+function handleNodeSelection(nodeData) {
+  // Find the corresponding sphere
+  const clickedSphere = spheres.find(sphere => sphere.userData.id === nodeData.id)
+  
+  if (!clickedSphere) return
+
+  // Find the corresponding li element
+  const correspondingLi = document.querySelector(`.layer-container ul li[data-node-id="${nodeData.id}"]`) ||
+                         Array.from(document.querySelectorAll('.layer-container ul li')).find(li => 
+                           li.textContent.trim() === nodeData.title
+                         )
+
+  // Check if the node is currently active
+  const isCurrentlyActive = correspondingLi && correspondingLi.classList.contains('active')
+
+  if (isCurrentlyActive) {
+    // If currently active, deactivate
+    if (correspondingLi) {
+      correspondingLi.classList.remove('active')
+    }
+    
+    // Remove existing popup if it exists
+    if (nodePopup) {
+      nodePopup.remove()
+      nodePopup = null
+    }
+    
+    // Reset sphere colors
+    resetAllSphereColors()
+    return
+  }
+
+  // Remove existing popup if it exists
+  if (nodePopup) {
+    nodePopup.remove()
+    nodePopup = null
+  }
+
+  // Reset all sphere colors first
+  resetAllSphereColors()
+
+  // Remove active class from all li elements
+  document.querySelectorAll('.layer-container ul li').forEach(liItem => {
+    liItem.classList.remove('active')
+  })
+
+  // Add active class to the corresponding li element
+  if (correspondingLi) {
+    correspondingLi.classList.add('active')
+  }
+
+  // Find all connected spheres
+  const connectedSphereIds = new Set()
+  connectedSphereIds.add(clickedSphere.userData.id) // Include the clicked sphere
+  
+  connections.forEach((connection) => {
+    if (connection.userData.source === clickedSphere.userData.id) {
+      connectedSphereIds.add(connection.userData.target)
+    }
+    if (connection.userData.target === clickedSphere.userData.id) {
+      connectedSphereIds.add(connection.userData.source)
+    }
+  })
+
+  // Change color of unconnected spheres to red
+  spheres.forEach((sphere) => {
+    if (!connectedSphereIds.has(sphere.userData.id)) {
+      sphere.material.emissive.setHex(0x464D52)
+      sphere.material.color.set(0x464D52)
+    }
+  })
+
+  // Reduce opacity of connections not involving the clicked sphere
+  connections.forEach((connection) => {
+    if (connection.userData.source !== clickedSphere.userData.id && 
+        connection.userData.target !== clickedSphere.userData.id) {
+      connection.material.opacity = 0.02
+    }
+  })
+
+  // Highlight the clicked sphere and store reference
+  clickedSphere.material.emissive.setHex(0x6FD4A0)
+  clickedSphere.material.color.set(0x6FD4A0)
+  currentlyHighlightedSphere = clickedSphere
+
+  // Create new popup
+  nodePopup = document.createElement("div")
+  nodePopup.className = "node-popup"
+
+  nodePopup.innerHTML = `
+    <div class="close-btn"></div>
+    <h1>${clickedSphere.userData.title}</h1>
+    <p>${clickedSphere.userData.description}</p>
+
+  `
+  if (clickedSphere.userData.tags && Array.isArray(clickedSphere.userData.tags)) {
+    const ul = document.createElement("ul")
+
+    clickedSphere.userData.tags.forEach((tag) => {
+      const li = document.createElement("li")
+      li.textContent = tag
+      ul.appendChild(li)
+    })
+
+    nodePopup.appendChild(ul)
+  }
+
+  document.body.appendChild(nodePopup)
+
+  // Add close button functionality
+  const closeBtn = nodePopup.querySelector(".close-btn")
+  closeBtn.addEventListener("click", () => {
+    nodePopup.remove()
+    nodePopup = null
+    // Reset sphere colors when popup closes
+    resetAllSphereColors()
+    // Remove active class from li elements when popup closes
+    if (correspondingLi) {
+      correspondingLi.classList.remove('active')
+    }
+  })
+}
+
 // Mouse click handler
 function onMouseClick(event) {
   // Calculate mouse position in normalized device coordinates
@@ -593,83 +783,7 @@ function onMouseClick(event) {
 
   if (intersects.length > 0) {
     const clickedSphere = intersects[0].object
-
-    // Remove existing popup if it exists
-    if (nodePopup) {
-      nodePopup.remove()
-      nodePopup = null
-    }
-
-    // Reset all sphere colors first
-    resetAllSphereColors()
-
-    // Find all connected spheres
-    const connectedSphereIds = new Set()
-    connectedSphereIds.add(clickedSphere.userData.id) // Include the clicked sphere
-    
-    connections.forEach((connection) => {
-      if (connection.userData.source === clickedSphere.userData.id) {
-        connectedSphereIds.add(connection.userData.target)
-      }
-      if (connection.userData.target === clickedSphere.userData.id) {
-        connectedSphereIds.add(connection.userData.source)
-      }
-    })
-
-    // Change color of unconnected spheres to red
-    spheres.forEach((sphere) => {
-      if (!connectedSphereIds.has(sphere.userData.id)) {
-        sphere.material.emissive.setHex(0x464D52)
-        sphere.material.color.set(0x464D52)
-      }
-    })
-
-    // Reduce opacity of connections not involving the clicked sphere
-    connections.forEach((connection) => {
-      if (connection.userData.source !== clickedSphere.userData.id && 
-          connection.userData.target !== clickedSphere.userData.id) {
-        connection.material.opacity = 0.02
-      }
-    })
-
-    // Highlight the clicked sphere and store reference
-    clickedSphere.material.emissive.setHex(0x6FD4A0)
-    clickedSphere.material.color.set(0x6FD4A0)
-    currentlyHighlightedSphere = clickedSphere
-
-    // Create new popup
-    nodePopup = document.createElement("div")
-    nodePopup.className = "node-popup"
-
-    nodePopup.innerHTML = `
-      <div class="close-btn"></div>
-      <h1>${clickedSphere.userData.title}</h1>
-      <p>${clickedSphere.userData.description}</p>
-
-    `
-    if (clickedSphere.userData.tags && Array.isArray(clickedSphere.userData.tags)) {
-      const ul = document.createElement("ul")
-
-      clickedSphere.userData.tags.forEach((tag) => {
-        const li = document.createElement("li")
-        li.textContent = tag
-        ul.appendChild(li)
-      })
-
-      nodePopup.appendChild(ul)
-    }
-
-    document.body.appendChild(nodePopup)
-
-
-    // Add close button functionality
-    const closeBtn = nodePopup.querySelector(".close-btn")
-    closeBtn.addEventListener("click", () => {
-      nodePopup.remove()
-      nodePopup = null
-      // Reset sphere colors when popup closes
-      resetAllSphereColors()
-    })
+    handleNodeSelection(clickedSphere.userData)
   } 
   // else {
   //   // Clicked on canvas but not on any sphere - close popup if it exists
@@ -700,8 +814,10 @@ function onMouseMove(event) {
     handleSphereHover(hoveredSphere, event.clientX, event.clientY)
     container.style.cursor = 'pointer'
   } else {
-    // No sphere is being hovered, reset hover effects
-    resetHoverEffects()
+    // No sphere is being hovered, reset hover effects only if not hovering li element
+    if (!isHoveringLiElement) {
+      resetHoverEffects()
+    }
     container.style.cursor = 'default'
   }
 }

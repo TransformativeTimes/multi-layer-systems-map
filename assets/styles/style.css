@@ -134,25 +134,34 @@ body {
   transition: height 150ms ease-in-out;
 }
 .nav-container .layers-wrap .layer-container.active {
-  height: 30vh;
+  height: 50vh;
+  padding: 5px 10px 0 10px;
 }
 .nav-container .layers-wrap .layer-container h2 {
   font-family: "EB Garamond", serif;
   text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
   font-size: 20px;
-  margin-bottom: 10px;
+  padding-bottom: 7px;
   cursor: pointer;
+  border-bottom: solid 1px #7C868E;
 }
 .nav-container .layers-wrap .layer-container ul {
   overflow: scroll;
   height: calc(100% - 40px);
-  margin-bottom: 20px;
+  padding-bottom: 20px;
+  position: relative;
+  padding-top: 10px;
 }
 .nav-container .layers-wrap .layer-container ul li {
   margin-bottom: 5px;
   cursor: pointer;
   width: -moz-fit-content;
   width: fit-content;
+  font-family: monospace;
+  font-size: 13px;
+}
+.nav-container .layers-wrap .layer-container ul li.active {
+  color: #76E3AB;
 }
 .nav-container ul.tags-container {
   display: flex;

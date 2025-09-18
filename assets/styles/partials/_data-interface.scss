@@ -80,7 +80,9 @@ body {
       transition: height 150ms ease-in-out;
 
       &.active {
-        height: 30vh;
+        //height: fit-content;
+        height: 50vh;
+        padding: $xs-spacing $s-spacing 0 $s-spacing;
 
       }
 
@@ -88,19 +90,33 @@ body {
         font-family: $garamond;
         text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
         font-size: 20px;
-        margin-bottom: $s-spacing;
+        padding-bottom: 7px;
         cursor: pointer;
+        border-bottom: solid 1px $neutral-700;
 
       }
 
       ul {
         overflow: scroll;
         height: calc(100% - 40px);
-        margin-bottom: $m-spacing;
+        padding-bottom: $m-spacing;
+        position: relative;
+        padding-top: $s-spacing;
+
+
+
+
         li {
           margin-bottom: $xs-spacing;
           cursor: pointer;
           width: fit-content;
+          font-family: monospace;
+          font-size: 13px;
+
+          &.active {
+            color: $green-700;
+          }
+
         }
 
       }
