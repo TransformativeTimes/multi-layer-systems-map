@@ -198,8 +198,10 @@ body {
       }
 
       &.active {
-        border-color: $neutral-1100;
-        background-color: $neutral-400;
+        // border-color: $neutral-1100;
+        // background-color: $neutral-400;
+        border-color: $green-800;
+        background-color: rgba(118, 227, 171, 0.1);
       }
 
     }

@@ -234,8 +234,8 @@ body {
   background-color: rgba(255, 255, 255, 0.05);
 }
 .nav-container ul.tags-container li.active {
-  border-color: #DCE0E3;
-  background-color: #464D52;
+  border-color: #9FF2C8;
+  background-color: rgba(118, 227, 171, 0.1);
 }
 .nav-container img.tt-logo {
   display: block;
