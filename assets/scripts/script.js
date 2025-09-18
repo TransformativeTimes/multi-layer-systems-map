@@ -481,18 +481,59 @@ function navigation(data) {
 
   // Draw all layers
 
-  const layersUl = document.createElement('ul')
-  layersUl.classList.add('layers-container')
+  const layersWrap = document.createElement('div')
+  layersWrap.classList.add('layers-wrap')
 
 
   data.layers.forEach(layer => {
 
-    let li = document.createElement('li')
+    const layerContainer = document.createElement('div')
+    layerContainer.classList.add('layer-container')
 
-    li.innerHTML = `${layer.name}`
-    layersUl.appendChild(li)
+    let layerTitle = document.createElement('h2')
+
+    layerTitle.innerHTML = `${layer.name}`
+
+    layerContainer.appendChild(layerTitle)
+
+    // Add click event to toggle active class on layerContainer
+    layerTitle.addEventListener('click', () => {
+      if (layerContainer.classList.contains('active')) {
+        // If already active, just remove the active class
+        layerContainer.classList.remove('active')
+      } else {
+        // Remove active class from all layer containers
+        document.querySelectorAll('.layer-container').forEach(container => {
+          container.classList.remove('active')
+        })
+        
+        // Add active class to the clicked layerContainer
+        layerContainer.classList.add('active')
+      }
+    })
+
+    const nodesList = document.createElement('ul')
+    
+    data.nodes
+      .filter(node => node.layerId === layer.id)
+      .forEach(node => {
+        const li = document.createElement('li')
+        li.textContent = node.title
+        nodesList.appendChild(li)
+      })
+
+    layerContainer.appendChild(nodesList)
+    layersWrap.appendChild(layerContainer)
+
+    
 
   })
+
+
+
+
+
+
 
   // Draw all tags
 
@@ -525,7 +566,7 @@ function navigation(data) {
 
   
   document.body.appendChild(navContainer)
-  navContainer.appendChild(layersUl)
+  navContainer.appendChild(layersWrap)
   navContainer.appendChild(tagsUl)
 }
 
@@ -695,7 +736,7 @@ controls.addEventListener("end", () => {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// region Window resize
+// region Window resize and Fullscreen
 ////////////////////////////////////////////////////////////////////////////////
 
 // Handle window resize
@@ -718,6 +759,71 @@ function onWindowResize() {
   })
 }
 window.addEventListener("resize", onWindowResize)
+
+
+// Fullscreen toggle functionality
+let isFullscreen = false
+const canvasContainer = document.getElementById('canvas-container')
+
+function toggleFullscreen() {
+  if (isFullscreen) {
+    // Return to normal view
+    canvasContainer.style.width = 'calc(100vw - 300px)'
+    canvasContainer.style.display = 'block'
+    isFullscreen = false
+
+    navContainer.style.display = 'flex'
+  } else {
+    // Go to fullscreen
+    canvasContainer.style.width = 'calc(100vw - 20px)'
+    canvasContainer.style.display = 'block'
+    isFullscreen = true
+
+    navContainer.style.display = 'none'
+  }
+
+  const width = canvasContainer.clientWidth
+  const height = canvasContainer.clientHeight
+  camera.aspect = width / height
+  camera.updateProjectionMatrix()
+  renderer.setSize(width, height)
+  composer.setSize(width, height)
+
+}
+
+// Add keyboard event listener for 'f' key and spacebar
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'f' || event.key === 'F') {
+    toggleFullscreen()
+  } else if (event.key === ' ') {
+    event.preventDefault() // Prevent default spacebar behavior (page scroll)
+    
+    // Toggle animation state - same logic as play button
+    if(animPlaying){
+      // Pausing - capture current accumulated time
+      if (!isUserControlling) {
+        const currentTime = (Date.now() - animationStartTime) * 0.0001
+        accumulatedTime += currentTime
+      }
+      animPlaying = false
+      playBtn.classList.remove('playing')
+      playBtn.classList.add('paused')
+    } else {
+      // Resuming - capture current camera position and reset accumulated time
+      const targetX = cameraTarget.x
+      const targetZ = cameraTarget.z
+      userCameraAngle = Math.atan2(camera.position.z - targetZ, camera.position.x - targetX)
+      userCameraRadius = Math.sqrt((camera.position.x - targetX) * (camera.position.x - targetX) + (camera.position.z - targetZ) * (camera.position.z - targetZ))
+      userCameraY = camera.position.y
+      animationStartTime = Date.now()
+      accumulatedTime = 0  // Reset accumulated time to start fresh from current position
+      animPlaying = true
+      
+      playBtn.classList.remove('paused')
+      playBtn.classList.add('playing')
+    }
+  }
+})
 
 
 
@@ -759,16 +865,12 @@ playBtn.addEventListener('click', function() {
 
 
 
-
-// Animation loop
 function animate() {
   requestAnimationFrame(animate)
 
-  // Update controls
   controls.update()
 
   // Camera animation - rotate around target when user is not controlling
-
   if(animPlaying){
       if (!isUserControlling) {
         const currentSessionTime = (Date.now() - animationStartTime) * 0.0001
@@ -781,46 +883,10 @@ function animate() {
     }
   } 
 
-
   composer.render()
 }
 
-// Fullscreen toggle functionality
-let isFullscreen = false
-const canvasContainer = document.getElementById('canvas-container')
 
-function toggleFullscreen() {
-  if (isFullscreen) {
-    // Return to normal view
-    canvasContainer.style.width = 'calc(100vw - 300px)'
-    canvasContainer.style.display = 'block'
-    isFullscreen = false
-
-    navContainer.style.display = 'flex'
-  } else {
-    // Go to fullscreen
-    canvasContainer.style.width = 'calc(100vw - 20px)'
-    canvasContainer.style.display = 'block'
-    isFullscreen = true
-
-    navContainer.style.display = 'none'
-  }
-
-  const width = canvasContainer.clientWidth
-  const height = canvasContainer.clientHeight
-  camera.aspect = width / height
-  camera.updateProjectionMatrix()
-  renderer.setSize(width, height)
-  composer.setSize(width, height)
-
-}
-
-// Add keyboard event listener for 'f' key
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'f' || event.key === 'F') {
-    toggleFullscreen()
-  }
-})
 
 // Initialize
 loadData()

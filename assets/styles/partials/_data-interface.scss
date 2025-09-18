@@ -64,20 +64,46 @@ body {
   padding: $s-spacing;
   width: 290px;
 
-  ul.layers-container {
+  .layers-wrap {
     display: flex;
     flex-direction: column;
     gap: $s-spacing;
     width: auto;
 
-    li {
+    .layer-container {
       width: 100%;
-      padding: $xs-spacing $s-spacing;
-      font-family: $garamond;
-      text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
-      font-size: 20px;
       border: solid 1px $neutral-500;
       border-radius: $xs-spacing;
+      padding: $xs-spacing $s-spacing;
+      height: 40px;
+      overflow: hidden;
+      transition: height 150ms ease-in-out;
+
+      &.active {
+        height: 30vh;
+
+      }
+
+      h2 {
+        font-family: $garamond;
+        text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
+        font-size: 20px;
+        margin-bottom: $s-spacing;
+        cursor: pointer;
+
+      }
+
+      ul {
+        overflow: scroll;
+        height: calc(100% - 40px);
+        margin-bottom: $m-spacing;
+        li {
+          margin-bottom: $xs-spacing;
+          cursor: pointer;
+          width: fit-content;
+        }
+
+      }
 
 
     }
