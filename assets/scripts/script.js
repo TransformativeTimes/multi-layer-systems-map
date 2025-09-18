@@ -125,8 +125,48 @@ function updateLiColorBehavior() {
   
   if (hasActiveItem) {
     layersWrap.classList.add('has-active-item')
+    
+    // Find the active li element and its corresponding node
+    const activeLi = document.querySelector('.layer-container ul li.active')
+    const activeNodeTitle = activeLi.textContent.trim()
+    const activeNode = spheres.find(sphere => sphere.userData.title === activeNodeTitle)
+    
+    if (activeNode) {
+      // Find all connected node IDs
+      const connectedNodeIds = new Set()
+      connectedNodeIds.add(activeNode.userData.id)
+      
+      connections.forEach((connection) => {
+        if (connection.userData.source === activeNode.userData.id) {
+          connectedNodeIds.add(connection.userData.target)
+        }
+        if (connection.userData.target === activeNode.userData.id) {
+          connectedNodeIds.add(connection.userData.source)
+        }
+      })
+      
+      // Update all li elements based on their connection status
+      document.querySelectorAll('.layer-container ul li').forEach(li => {
+        const nodeTitle = li.textContent.trim()
+        const correspondingSphere = spheres.find(sphere => sphere.userData.title === nodeTitle)
+        
+        if (correspondingSphere) {
+          if (connectedNodeIds.has(correspondingSphere.userData.id)) {
+            // Connected nodes (including active node) - add connected class
+            li.classList.add('connected')
+          } else {
+            // Unconnected nodes - remove connected class
+            li.classList.remove('connected')
+          }
+        }
+      })
+    }
   } else {
     layersWrap.classList.remove('has-active-item')
+    // Remove connected class from all li elements when no item is active
+    document.querySelectorAll('.layer-container ul li').forEach(li => {
+      li.classList.remove('connected')
+    })
   }
 }
 
@@ -371,8 +411,8 @@ function handleNodeHover(nodeData, mouseX, mouseY, showTooltipFlag = true) {
 
   // Apply hover effect to new sphere (only if it's not already highlighted)
   if (hoveredSphere && hoveredSphere !== currentlyHighlightedSphere) {
-    hoveredSphere.material.emissive.setHex(0x9FF2C8)
-    hoveredSphere.material.color.set(0x9FF2C8)
+    hoveredSphere.material.emissive.setHex(0x76E3AB)
+    hoveredSphere.material.color.set(0x76E3AB)
   }
 
   currentlyHoveredSphere = hoveredSphere
@@ -667,10 +707,6 @@ function navigation(data) {
 
 
 
-
-
-
-
   // Draw all tags
 
   const tagsUl = document.createElement('ul')
@@ -700,10 +736,15 @@ function navigation(data) {
   })
 
 
+  const ttLogo = document.createElement('img')
+  ttLogo.src ='assets/images/tt-logo.svg'
+  ttLogo.classList.add('tt-logo')
+
   
   document.body.appendChild(navContainer)
   navContainer.appendChild(layersWrap)
   navContainer.appendChild(tagsUl)
+  navContainer.appendChild(ttLogo)
 }
 
 

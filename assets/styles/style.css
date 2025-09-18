@@ -156,6 +156,9 @@ body {
   padding-bottom: 7px;
   cursor: pointer;
   border-bottom: solid 1px #59636B;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .nav-container .layers-wrap .layer-container ul {
   overflow: scroll;
@@ -174,15 +177,21 @@ body {
   font-size: 13px;
   transition: all 150ms ease-out;
   position: relative;
-  color: #F5F7F9;
+  color: #C4CACE;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 .nav-container .layers-wrap .layer-container ul li:hover {
   opacity: 1;
-  color: #C1FFE1 !important;
+  color: #76E3AB !important;
 }
 .nav-container .layers-wrap .layer-container ul li.active {
   text-shadow: 0px 0px 3px rgba(118, 227, 171, 0.5);
   color: #76E3AB;
+}
+.nav-container .layers-wrap .layer-container ul li.connected {
+  color: #C4CACE !important;
 }
 .nav-container ul.tags-container {
   display: flex;
@@ -200,6 +209,11 @@ body {
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.2s ease;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  font-size: 13px;
+  transition: all 150ms ease-in-out;
 }
 .nav-container ul.tags-container li:hover {
   border-color: #7C868E;
@@ -208,6 +222,13 @@ body {
 .nav-container ul.tags-container li.active {
   border-color: #DCE0E3;
   background-color: #464D52;
+}
+.nav-container img.tt-logo {
+  display: block;
+  width: 70%;
+  opacity: 0.4;
+  margin: auto auto 10px auto;
+  pointer-events: none;
 }
 
 .play-btn {
