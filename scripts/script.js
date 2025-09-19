@@ -114,6 +114,51 @@ const spheres = []
 const activeTags = new Set()
 let sphereRadius = 0.25
 
+// Global variable to store the active layer ID
+let activeLayerId = null
+
+// Function to update sphere colors based on active layer
+function updateSphereColorsForActiveLayer() {  
+  // Only apply layer-based coloring if no individual sphere is currently highlighted
+  if (currentlyHighlightedSphere) {
+    console.log('Individual sphere is highlighted, skipping layer-based coloring')
+    return
+  }
+  
+  if (activeLayerId) {
+    console.log('Active layer ID:', activeLayerId)
+    
+    // Update sphere colors: grey for spheres not in active layer, normal for spheres in active layer
+    spheres.forEach((sphere) => {
+      if (sphere.userData.layerId !== activeLayerId) {
+        // Sphere not in active layer - make it grey
+        sphere.material.emissive.setHex(0x464D52)
+        sphere.material.color.set(0x464D52)
+      } else {
+        // Sphere in active layer - keep normal color
+        sphere.material.emissive.setHex(0xffffff)
+        sphere.material.color.set(0xffffff)
+      }
+    })
+    
+    // Reduce opacity of all connections when layer is active (similar to sphere click behavior)
+    connections.forEach((connection) => {
+      connection.material.opacity = 0.02
+    })
+  } else {
+    // No layer is active - reset all sphere colors to normal
+    spheres.forEach((sphere) => {
+      sphere.material.emissive.setHex(0xffffff)
+      sphere.material.color.set(0xffffff)
+    })
+    
+    // Reset connection opacity to normal
+    connections.forEach((connection) => {
+      connection.material.opacity = 0.2
+    })
+  }
+}
+
 // Function to update li color behavior based on active state
 function updateLiColorBehavior() {
   const layersWrap = document.querySelector('.layers-wrap')
@@ -378,20 +423,23 @@ function isConnectedToHighlighted(sphere) {
 }
 
 // Function to reset all sphere colors and opacity to original state
-function resetAllSphereColors() {
+function resetAllSphereColors(applyLayerColoring = true) {
   spheres.forEach((sphere) => {
-    sphere.material.emissive.setHex(0xffffff)
-    sphere.material.color.set(0xffffff)
     sphere.material.opacity = 1
     sphere.material.transparent = false
   })
   
-  // Reset connection opacity
+  // Reset connection opacity to normal first
   connections.forEach((connection) => {
     connection.material.opacity = 0.2
   })
   
   currentlyHighlightedSphere = null
+  
+  // Apply layer-based coloring only if requested (and no individual sphere is about to be highlighted)
+  if (applyLayerColoring) {
+    updateSphereColorsForActiveLayer()
+  }
 }
 
 // Function to handle node hover effects (works with both spheres and li elements)
@@ -403,8 +451,19 @@ function handleNodeHover(nodeData, mouseX, mouseY, showTooltipFlag = true) {
 
   // Reset previously hovered sphere if it's different and not currently highlighted
   if (currentlyHoveredSphere && currentlyHoveredSphere !== hoveredSphere && currentlyHoveredSphere !== currentlyHighlightedSphere) {
-    // Determine the correct reset color based on whether a sphere is clicked
-    const resetColor = currentlyHighlightedSphere && !isConnectedToHighlighted(currentlyHoveredSphere) ? 0x464D52 : 0xffffff
+    // Determine the correct reset color based on layer and connection state
+    let resetColor = 0xffffff
+    
+    // Check if a sphere is currently highlighted (clicked)
+    if (currentlyHighlightedSphere && !isConnectedToHighlighted(currentlyHoveredSphere)) {
+      resetColor = 0x464D52
+    } else {
+      // Check if a layer is active and this sphere is not in that layer
+      if (activeLayerId && currentlyHoveredSphere.userData.layerId !== activeLayerId) {
+        resetColor = 0x464D52
+      }
+    }
+    
     currentlyHoveredSphere.material.emissive.setHex(resetColor)
     currentlyHoveredSphere.material.color.set(resetColor)
   }
@@ -431,8 +490,19 @@ function handleSphereHover(hoveredSphere, mouseX, mouseY) {
 // Function to reset hover effects
 function resetHoverEffects() {
   if (currentlyHoveredSphere && currentlyHoveredSphere !== currentlyHighlightedSphere) {
-    // Determine the correct reset color based on whether a sphere is clicked
-    const resetColor = currentlyHighlightedSphere && !isConnectedToHighlighted(currentlyHoveredSphere) ? 0x464D52 : 0xffffff
+    // Determine the correct reset color based on layer and connection state
+    let resetColor = 0xffffff
+    
+    // Check if a sphere is currently highlighted (clicked)
+    if (currentlyHighlightedSphere && !isConnectedToHighlighted(currentlyHoveredSphere)) {
+      resetColor = 0x464D52
+    } else {
+      // Check if a layer is active and this sphere is not in that layer
+      if (activeLayerId && currentlyHoveredSphere.userData.layerId !== activeLayerId) {
+        resetColor = 0x464D52
+      }
+    }
+    
     currentlyHoveredSphere.material.emissive.setHex(resetColor)
     currentlyHoveredSphere.material.color.set(resetColor)
   }
@@ -639,9 +709,13 @@ function navigation(data) {
 
     // Add click event to toggle active class on layerContainer
     layerTitle.addEventListener('click', () => {
+      console.log('Layer clicked:', layer.name, 'ID:', layer.id)
+      
       if (layerContainer.classList.contains('active')) {
         // If already active, just remove the active class
         layerContainer.classList.remove('active')
+        activeLayerId = null
+        console.log('Deactivated layer:', layer.name)
       } else {
         // Remove active class from all layer containers
         document.querySelectorAll('.layer-container').forEach(container => {
@@ -650,7 +724,12 @@ function navigation(data) {
         
         // Add active class to the clicked layerContainer
         layerContainer.classList.add('active')
+        activeLayerId = layer.id
+        console.log('Activated layer:', layer.name, 'Active layer ID set to:', activeLayerId)
       }
+      
+      // Update sphere colors based on the new layer activation state
+      updateSphereColorsForActiveLayer()
     })
 
     const nodesList = document.createElement('ul')
@@ -792,8 +871,8 @@ function handleNodeSelection(nodeData) {
     nodePopup = null
   }
 
-  // Reset all sphere colors first
-  resetAllSphereColors()
+  // Reset all sphere colors first (without applying layer coloring since we're about to highlight a sphere)
+  resetAllSphereColors(false)
 
   // Remove active class from all li elements
   document.querySelectorAll('.layer-container ul li').forEach(liItem => {
@@ -804,6 +883,29 @@ function handleNodeSelection(nodeData) {
   if (correspondingLi) {
     correspondingLi.classList.add('active')
   }
+  
+  // Find and activate the layer container that contains this sphere
+  const sphereLayerId = clickedSphere.userData.layerId
+  document.querySelectorAll('.layer-container').forEach(container => {
+    // Check if this container has the sphere by looking for its li element
+    const hasThisSphere = Array.from(container.querySelectorAll('ul li')).some(li => 
+      li.textContent.trim() === clickedSphere.userData.title
+    )
+    
+    if (hasThisSphere) {
+      // Remove active class from all other layer containers
+      document.querySelectorAll('.layer-container').forEach(otherContainer => {
+        if (otherContainer !== container) {
+          otherContainer.classList.remove('active')
+        }
+      })
+      
+      // Activate this layer container
+      container.classList.add('active')
+      activeLayerId = sphereLayerId
+      console.log('Opened layer container for sphere:', clickedSphere.userData.title, 'in layer:', sphereLayerId)
+    }
+  })
   
   // Update li color behavior
   updateLiColorBehavior()
@@ -821,11 +923,18 @@ function handleNodeSelection(nodeData) {
     }
   })
 
-  // Change color of unconnected spheres to red
+  // Update sphere colors based on connection status
   spheres.forEach((sphere) => {
     if (!connectedSphereIds.has(sphere.userData.id)) {
+      // Unconnected spheres - make them grey
       sphere.material.emissive.setHex(0x464D52)
       sphere.material.color.set(0x464D52)
+    } else {
+      // Connected spheres (including clicked sphere) - ensure they are white
+      if (sphere !== clickedSphere) {
+        sphere.material.emissive.setHex(0xffffff)
+        sphere.material.color.set(0xffffff)
+      }
     }
   })
 
@@ -1070,6 +1179,16 @@ document.addEventListener('keydown', (event) => {
       })
       // Update li color behavior
       updateLiColorBehavior()
+    }
+    
+    // Close active layer container if one exists
+    const activeLayerContainer = document.querySelector('.layer-container.active')
+    if (activeLayerContainer) {
+      activeLayerContainer.classList.remove('active')
+      activeLayerId = null
+      console.log('Closed active layer container with Esc key')
+      // Update sphere colors to remove layer-based coloring
+      updateSphereColorsForActiveLayer()
     }
   }
 })

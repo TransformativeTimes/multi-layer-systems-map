@@ -2,22 +2,22 @@
   "layers": [
     {
       "id": "layer_01",
-      "name": "Present",
+      "name": "Past",
       "order": 0
     },
     {
       "id": "layer_02",
-      "name": "Transitions",
+      "name": "Present",
       "order": 1
     },
     {
       "id": "layer_03",
-      "name": "Future",
+      "name": "Transitions",
       "order": 2
     },
     {
       "id": "layer_04",
-      "name": "Far Future",
+      "name": "Future",
       "order": 3
     }
   ],
