@@ -272,7 +272,7 @@ body {
   filter: brightness(1.5);
 }
 .play-btn.playing {
-  background-image: url(images/paused.svg);
+  background-image: url(/images/paused.svg);
 }
 .play-btn.paused {
   background-image: url(/images/play.svg);
