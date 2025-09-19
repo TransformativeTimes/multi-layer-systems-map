@@ -483,7 +483,7 @@ async function loadData() {
     flowParticles.length = 0
     
     // Read the data.json file
-    const response = await fetch("assets/data/template-data-2.json")
+    const response = await fetch("/data/template-data-2.json")
     const data = await response.json()
 
     // Create layer Y position mapping
@@ -701,8 +701,6 @@ function navigation(data) {
     layerContainer.appendChild(nodesList)
     layersWrap.appendChild(layerContainer)
 
-    
-
   })
 
 
@@ -737,7 +735,7 @@ function navigation(data) {
 
 
   const ttLogo = document.createElement('img')
-  ttLogo.src ='assets/images/tt-logo.svg'
+  ttLogo.src ='/images/tt-logo.svg'
   ttLogo.classList.add('tt-logo')
 
   
@@ -1023,6 +1021,11 @@ function toggleFullscreen() {
 
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// region Keyboard shortcuts
+////////////////////////////////////////////////////////////////////////////////
+
+
 // Add keyboard event listener for 'f' key, spacebar, and ESC key
 document.addEventListener('keydown', (event) => {
   if (event.key === 'f' || event.key === 'F') {
@@ -1074,7 +1077,7 @@ document.addEventListener('keydown', (event) => {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// region Animation
+// region Play / Stop rotation
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -1109,6 +1112,10 @@ playBtn.addEventListener('click', function() {
   
 });
 
+
+////////////////////////////////////////////////////////////////////////////////
+// region Animation
+////////////////////////////////////////////////////////////////////////////////
 
 
 function animate() {

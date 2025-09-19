@@ -161,6 +161,11 @@ body {
 
           &.connected {
             color: $neutral-1000 !important;
+
+            &:hover {
+              color: $green-700 !important;
+            }
+
           }
 
       
@@ -213,6 +218,7 @@ body {
     opacity: 0.4;
     margin: auto auto $s-spacing auto;
     pointer-events: none;
+    user-select: none;
   } 
 
 }
@@ -243,11 +249,11 @@ body {
   }
 
   &.playing{
-    background-image: url(/assets/images/paused.svg);
+    background-image: url(images/paused.svg);
   }
 
   &.paused{
-    background-image: url(/assets/images/play.svg);
+    background-image: url(/images/play.svg);
   }
 
 

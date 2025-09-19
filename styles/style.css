@@ -207,6 +207,9 @@ body {
 .nav-container .layers-wrap .layer-container ul li.connected {
   color: #C4CACE !important;
 }
+.nav-container .layers-wrap .layer-container ul li.connected:hover {
+  color: #76E3AB !important;
+}
 .nav-container ul.tags-container {
   display: flex;
   flex-direction: row;
@@ -243,6 +246,9 @@ body {
   opacity: 0.4;
   margin: auto auto 10px auto;
   pointer-events: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
 }
 
 .play-btn {
@@ -266,10 +272,10 @@ body {
   filter: brightness(1.5);
 }
 .play-btn.playing {
-  background-image: url(/assets/images/paused.svg);
+  background-image: url(images/paused.svg);
 }
 .play-btn.paused {
-  background-image: url(/assets/images/play.svg);
+  background-image: url(/images/play.svg);
 }
 
 .sphere-tooltip {
