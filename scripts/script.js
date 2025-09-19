@@ -700,6 +700,9 @@ function navigation(data) {
 
     const layerContainer = document.createElement('div')
     layerContainer.classList.add('layer-container')
+    
+    // Store layer data on the container element for keyboard shortcuts
+    layerContainer._layerData = layer
 
     let layerTitle = document.createElement('h2')
 
@@ -1135,7 +1138,7 @@ function toggleFullscreen() {
 ////////////////////////////////////////////////////////////////////////////////
 
 
-// Add keyboard event listener for 'f' key, spacebar, and ESC key
+// Add keyboard event listener for 'f' key, spacebar, ESC key, and number keys (1-9)
 document.addEventListener('keydown', (event) => {
   if (event.key === 'f' || event.key === 'F') {
     toggleFullscreen()
@@ -1189,6 +1192,43 @@ document.addEventListener('keydown', (event) => {
       console.log('Closed active layer container with Esc key')
       // Update sphere colors to remove layer-based coloring
       updateSphereColorsForActiveLayer()
+    }
+  } else if (event.key >= '1' && event.key <= '9') {
+    // Handle number keys 1-9 for opening layer containers
+    const keyNumber = parseInt(event.key)
+    const layerContainers = document.querySelectorAll('.layer-container')
+    
+    // Only enable shortcuts if there are less than 9 layers
+    if (layerContainers.length < 9 && keyNumber <= layerContainers.length) {
+      const targetContainer = layerContainers[keyNumber - 1] // Convert to 0-based index
+      
+      if (targetContainer) {
+        // Check if this container is already active
+        if (targetContainer.classList.contains('active')) {
+          // If already active, deactivate it
+          targetContainer.classList.remove('active')
+          activeLayerId = null
+          console.log(`Deactivated layer container ${keyNumber} with number key`)
+        } else {
+          // Remove active class from all layer containers
+          layerContainers.forEach(container => {
+            container.classList.remove('active')
+          })
+          
+          // Activate the target container
+          targetContainer.classList.add('active')
+          
+          // Get the layer data from the container element
+          const layerData = targetContainer._layerData
+          if (layerData) {
+            activeLayerId = layerData.id
+            console.log(`Activated layer container ${keyNumber} (${layerData.name}) with number key`)
+          }
+        }
+        
+        // Update sphere colors based on the new layer activation state
+        updateSphereColorsForActiveLayer()
+      }
     }
   }
 })
