@@ -1285,12 +1285,17 @@ function animate() {
   // Update flow particles
   const deltaTime = 0.016 // Approximate 60fps
   flowParticles.forEach(particleData => {
-    // Move particle along curve
-    particleData.progress += particleData.speed * deltaTime
-    
-    // Reset to beginning when reaching end
-    if (particleData.progress > 1.0) {
-      particleData.progress = 0.0
+
+    // Move particles along curve from top to bottom
+    // particleData.progress += particleData.speed * deltaTime
+    // if (particleData.progress > 1.0) {
+    //   particleData.progress = 0.0
+    // }
+
+    //Move particles along curve from bottom to top
+    particleData.progress -= particleData.speed * deltaTime
+    if (particleData.progress < 0.0) {
+      particleData.progress = 1.0
     }
     
     // Update particle position
