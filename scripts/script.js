@@ -8,13 +8,12 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 // region Three.js setup
 ////////////////////////////////////////////////////////////////////////////////
 
-
 // Scene setup
 const scene = new THREE.Scene()
 scene.background = new THREE.Color(0x171717)
 
 // Get canvas container
-const container = document.getElementById('canvas-container') || document.body
+const container = document.getElementById("canvas-container") || document.body
 
 // Camera setup
 // PERSPECTIVE CAMERA
@@ -47,9 +46,6 @@ controls.touches = {
   TWO: THREE.TOUCH.DOLLY_PAN,
 }
 
-
-
-
 ////////////////////////////////////////////////////////////////////////////////
 // region Lighting
 ////////////////////////////////////////////////////////////////////////////////
@@ -62,11 +58,9 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 0.9)
 directionalLight.position.set(10, 10, 5)
 scene.add(directionalLight)
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // region Global Variables
 ////////////////////////////////////////////////////////////////////////////////
-
 
 // Raycaster for click detection
 const raycaster = new THREE.Raycaster()
@@ -81,19 +75,21 @@ let isHoveringLiElement = false
 // Tooltip element for hover
 let sphereTooltip = null
 
+// fullscreen
+let isFullscreen = false
+const canvasContainer = document.getElementById("canvas-container")
 
 // navigation container
-const navContainer = document.createElement('div')
-navContainer.classList.add('nav-container')
+const navContainer = document.createElement("div")
+navContainer.classList.add("nav-container")
 
-const playBtn = document.createElement('div')
-playBtn.classList.add('play-btn', 'playing')
-navContainer.appendChild(playBtn)
-
+const playBtn = document.createElement("div")
+playBtn.classList.add("play-btn", "playing")
+canvasContainer.appendChild(playBtn)
 
 // Animation control variables
 
-let animPlaying = true;
+let animPlaying = true
 
 let isUserControlling = false
 let lastInteractionTime = 0
@@ -104,8 +100,6 @@ let userCameraAngle = 0
 let userCameraRadius = 25
 let userCameraY = 10
 let cameraTarget = new THREE.Vector3(0, 0, 0)
-
-
 
 // Array to store sphere meshes with their data
 const spheres = []
@@ -118,29 +112,29 @@ let sphereRadius = 0.25
 let activeLayerId = null
 
 // Function to update sphere colors based on active layer
-function updateSphereColorsForActiveLayer() {  
+function updateSphereColorsForActiveLayer() {
   // Only apply layer-based coloring if no individual sphere is currently highlighted
   if (currentlyHighlightedSphere) {
-    console.log('Individual sphere is highlighted, skipping layer-based coloring')
+    console.log("Individual sphere is highlighted, skipping layer-based coloring")
     return
   }
-  
+
   if (activeLayerId) {
-    console.log('Active layer ID:', activeLayerId)
-    
+    console.log("Active layer ID:", activeLayerId)
+
     // Update sphere colors: grey for spheres not in active layer, normal for spheres in active layer
     spheres.forEach((sphere) => {
       if (sphere.userData.layerId !== activeLayerId) {
         // Sphere not in active layer - make it grey
-        sphere.material.emissive.setHex(0x464D52)
-        sphere.material.color.set(0x464D52)
+        sphere.material.emissive.setHex(0x464d52)
+        sphere.material.color.set(0x464d52)
       } else {
         // Sphere in active layer - keep normal color
         sphere.material.emissive.setHex(0xffffff)
         sphere.material.color.set(0xffffff)
       }
     })
-    
+
     // Reduce opacity of all connections when layer is active (similar to sphere click behavior)
     connections.forEach((connection) => {
       connection.material.opacity = 0.02
@@ -151,7 +145,7 @@ function updateSphereColorsForActiveLayer() {
       sphere.material.emissive.setHex(0xffffff)
       sphere.material.color.set(0xffffff)
     })
-    
+
     // Reset connection opacity to normal
     connections.forEach((connection) => {
       connection.material.opacity = 0.2
@@ -161,26 +155,26 @@ function updateSphereColorsForActiveLayer() {
 
 // Function to update li color behavior based on active state
 function updateLiColorBehavior() {
-  const layersWrap = document.querySelector('.layers-wrap')
+  const layersWrap = document.querySelector(".layers-wrap")
   if (!layersWrap) {
     return
   }
-  
-  const hasActiveItem = document.querySelector('.layer-container ul li.active') !== null
-  
+
+  const hasActiveItem = document.querySelector(".layer-container ul li.active") !== null
+
   if (hasActiveItem) {
-    layersWrap.classList.add('has-active-item')
-    
+    layersWrap.classList.add("has-active-item")
+
     // Find the active li element and its corresponding node
-    const activeLi = document.querySelector('.layer-container ul li.active')
+    const activeLi = document.querySelector(".layer-container ul li.active")
     const activeNodeTitle = activeLi.textContent.trim()
-    const activeNode = spheres.find(sphere => sphere.userData.title === activeNodeTitle)
-    
+    const activeNode = spheres.find((sphere) => sphere.userData.title === activeNodeTitle)
+
     if (activeNode) {
       // Find all connected node IDs
       const connectedNodeIds = new Set()
       connectedNodeIds.add(activeNode.userData.id)
-      
+
       connections.forEach((connection) => {
         if (connection.userData.source === activeNode.userData.id) {
           connectedNodeIds.add(connection.userData.target)
@@ -189,28 +183,28 @@ function updateLiColorBehavior() {
           connectedNodeIds.add(connection.userData.source)
         }
       })
-      
+
       // Update all li elements based on their connection status
-      document.querySelectorAll('.layer-container ul li').forEach(li => {
+      document.querySelectorAll(".layer-container ul li").forEach((li) => {
         const nodeTitle = li.textContent.trim()
-        const correspondingSphere = spheres.find(sphere => sphere.userData.title === nodeTitle)
-        
+        const correspondingSphere = spheres.find((sphere) => sphere.userData.title === nodeTitle)
+
         if (correspondingSphere) {
           if (connectedNodeIds.has(correspondingSphere.userData.id)) {
             // Connected nodes (including active node) - add connected class
-            li.classList.add('connected')
+            li.classList.add("connected")
           } else {
             // Unconnected nodes - remove connected class
-            li.classList.remove('connected')
+            li.classList.remove("connected")
           }
         }
       })
     }
   } else {
-    layersWrap.classList.remove('has-active-item')
+    layersWrap.classList.remove("has-active-item")
     // Remove connected class from all li elements when no item is active
-    document.querySelectorAll('.layer-container ul li').forEach(li => {
-      li.classList.remove('connected')
+    document.querySelectorAll(".layer-container ul li").forEach((li) => {
+      li.classList.remove("connected")
     })
   }
 }
@@ -222,12 +216,9 @@ const connectionMaterials = []
 // Array to store flow particles
 const flowParticles = []
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // region Rendering nodes
 ////////////////////////////////////////////////////////////////////////////////
-
-
 
 // Function to calculate the bounding box of all spheres
 function calculateBoundingBox() {
@@ -303,7 +294,6 @@ function generateValidPosition(existingSpheres, yPosition = 0, maxAttempts = 100
   return new THREE.Vector3((Math.random() - 0.5) * 15, yPosition, (Math.random() - 0.5) * 15)
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // region Connections between nodes
 ////////////////////////////////////////////////////////////////////////////////
@@ -349,12 +339,12 @@ function createConnections(data) {
 
       // Create tube geometry from curve for proper shader support
       const tubeGeometry = new THREE.TubeGeometry(curve, 50, 0.02, 8, false)
-      
+
       // Create simple solid green material
       const material = new THREE.MeshBasicMaterial({
         color: 0x76e3ab,
         opacity: 0.1,
-        transparent: true
+        transparent: true,
       })
 
       // Create the mesh (instead of line)
@@ -376,35 +366,34 @@ function createConnections(data) {
 function createFlowParticles(curve, connection) {
   const particleCount = 10 // Number of particles per tube
   const particleGeometry = new THREE.SphereGeometry(0.015, 8, 6)
-  
+
   for (let i = 0; i < particleCount; i++) {
     // Create glowing particle material
     const particleMaterial = new THREE.MeshPhongMaterial({
       color: 0x00ff88,
       emissive: 0x00ff88,
-      emissiveIntensity: 0.5
+      emissiveIntensity: 0.5,
     })
-    
+
     const particle = new THREE.Mesh(particleGeometry, particleMaterial)
-    
+
     // Store particle data
     const particleData = {
       mesh: particle,
       curve: curve,
       progress: i / particleCount, // Stagger particles along the curve
-      speed: 0.05  , // Movement speed
-      connection: connection
+      speed: 0.05, // Movement speed
+      connection: connection,
     }
-    
+
     // Position particle at initial progress
     const position = curve.getPointAt(particleData.progress)
     particle.position.copy(position)
-    
+
     scene.add(particle)
     flowParticles.push(particleData)
   }
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // region Hover Interaction
@@ -413,12 +402,11 @@ function createFlowParticles(curve, connection) {
 // Function to check if a sphere is connected to the highlighted sphere
 function isConnectedToHighlighted(sphere) {
   if (!currentlyHighlightedSphere) return false
-  
+
   if (sphere === currentlyHighlightedSphere) return true
-  
+
   return connections.some((connection) => {
-    return (connection.userData.source === currentlyHighlightedSphere.userData.id && connection.userData.target === sphere.userData.id) ||
-           (connection.userData.target === currentlyHighlightedSphere.userData.id && connection.userData.source === sphere.userData.id)
+    return (connection.userData.source === currentlyHighlightedSphere.userData.id && connection.userData.target === sphere.userData.id) || (connection.userData.target === currentlyHighlightedSphere.userData.id && connection.userData.source === sphere.userData.id)
   })
 }
 
@@ -428,14 +416,14 @@ function resetAllSphereColors(applyLayerColoring = true) {
     sphere.material.opacity = 1
     sphere.material.transparent = false
   })
-  
+
   // Reset connection opacity to normal first
   connections.forEach((connection) => {
     connection.material.opacity = 0.2
   })
-  
+
   currentlyHighlightedSphere = null
-  
+
   // Apply layer-based coloring only if requested (and no individual sphere is about to be highlighted)
   if (applyLayerColoring) {
     updateSphereColorsForActiveLayer()
@@ -445,37 +433,37 @@ function resetAllSphereColors(applyLayerColoring = true) {
 // Function to handle node hover effects (works with both spheres and li elements)
 function handleNodeHover(nodeData, mouseX, mouseY, showTooltipFlag = true) {
   // Find the corresponding sphere
-  const hoveredSphere = spheres.find(sphere => sphere.userData.id === nodeData.id)
-  
+  const hoveredSphere = spheres.find((sphere) => sphere.userData.id === nodeData.id)
+
   if (!hoveredSphere) return
 
   // Reset previously hovered sphere if it's different and not currently highlighted
   if (currentlyHoveredSphere && currentlyHoveredSphere !== hoveredSphere && currentlyHoveredSphere !== currentlyHighlightedSphere) {
     // Determine the correct reset color based on layer and connection state
     let resetColor = 0xffffff
-    
+
     // Check if a sphere is currently highlighted (clicked)
     if (currentlyHighlightedSphere && !isConnectedToHighlighted(currentlyHoveredSphere)) {
-      resetColor = 0x464D52
+      resetColor = 0x464d52
     } else {
       // Check if a layer is active and this sphere is not in that layer
       if (activeLayerId && currentlyHoveredSphere.userData.layerId !== activeLayerId) {
-        resetColor = 0x464D52
+        resetColor = 0x464d52
       }
     }
-    
+
     currentlyHoveredSphere.material.emissive.setHex(resetColor)
     currentlyHoveredSphere.material.color.set(resetColor)
   }
 
   // Apply hover effect to new sphere (only if it's not already highlighted)
   if (hoveredSphere && hoveredSphere !== currentlyHighlightedSphere) {
-    hoveredSphere.material.emissive.setHex(0x76E3AB)
-    hoveredSphere.material.color.set(0x76E3AB)
+    hoveredSphere.material.emissive.setHex(0x76e3ab)
+    hoveredSphere.material.color.set(0x76e3ab)
   }
 
   currentlyHoveredSphere = hoveredSphere
-  
+
   // Show tooltip only if requested
   if (showTooltipFlag) {
     showTooltip(hoveredSphere, mouseX, mouseY)
@@ -492,22 +480,22 @@ function resetHoverEffects() {
   if (currentlyHoveredSphere && currentlyHoveredSphere !== currentlyHighlightedSphere) {
     // Determine the correct reset color based on layer and connection state
     let resetColor = 0xffffff
-    
+
     // Check if a sphere is currently highlighted (clicked)
     if (currentlyHighlightedSphere && !isConnectedToHighlighted(currentlyHoveredSphere)) {
-      resetColor = 0x464D52
+      resetColor = 0x464d52
     } else {
       // Check if a layer is active and this sphere is not in that layer
       if (activeLayerId && currentlyHoveredSphere.userData.layerId !== activeLayerId) {
-        resetColor = 0x464D52
+        resetColor = 0x464d52
       }
     }
-    
+
     currentlyHoveredSphere.material.emissive.setHex(resetColor)
     currentlyHoveredSphere.material.color.set(resetColor)
   }
   currentlyHoveredSphere = null
-  
+
   // Hide tooltip
   hideTooltip()
 }
@@ -515,31 +503,26 @@ function resetHoverEffects() {
 // Function to create and show tooltip
 function showTooltip(sphere, mouseX, mouseY) {
   if (!sphereTooltip) {
-    sphereTooltip = document.createElement('p')
-    sphereTooltip.className = 'sphere-tooltip'
-    sphereTooltip.style.position = 'fixed'
-    sphereTooltip.style.pointerEvents = 'none'
-    sphereTooltip.style.zIndex = '1000'
+    sphereTooltip = document.createElement("p")
+    sphereTooltip.className = "sphere-tooltip"
+    sphereTooltip.style.position = "fixed"
+    sphereTooltip.style.pointerEvents = "none"
+    sphereTooltip.style.zIndex = "1000"
     document.body.appendChild(sphereTooltip)
   }
-  
+
   sphereTooltip.textContent = sphere.userData.title
-  sphereTooltip.style.left = mouseX + 10 + 'px'
-  sphereTooltip.style.top = mouseY - 25 + 'px'
-  sphereTooltip.style.display = 'block'
+  sphereTooltip.style.left = mouseX + 10 + "px"
+  sphereTooltip.style.top = mouseY - 25 + "px"
+  sphereTooltip.style.display = "block"
 }
 
 // Function to hide tooltip
 function hideTooltip() {
   if (sphereTooltip) {
-    sphereTooltip.style.display = 'none'
+    sphereTooltip.style.display = "none"
   }
 }
-
-
-
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // region Loading data
@@ -551,7 +534,7 @@ async function loadData() {
     // Clear existing arrays
     connectionMaterials.length = 0
     flowParticles.length = 0
-    
+
     // Read the data.json file
     const response = await fetch("/data/data-placeholder.json")
     const data = await response.json()
@@ -608,68 +591,64 @@ async function loadData() {
     fitCameraToLayers()
 
     navigation(data)
-
   } catch (error) {
     console.error("Error loading data:", error)
   }
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // region Navigation
 ////////////////////////////////////////////////////////////////////////////////
 
-
-
 // Function to update sphere visibility based on active tags
 function updateSphereVisibility() {
-  spheres.forEach(sphere => {
+  spheres.forEach((sphere) => {
     const nodeTags = sphere.userData.tags || []
-    
+
     if (activeTags.size === 0) {
       // If no tags are active, show all spheres
       sphere.visible = true
     } else {
       // Check if sphere has any active tag
-      const hasActiveTag = nodeTags.some(tag => activeTags.has(tag))
+      const hasActiveTag = nodeTags.some((tag) => activeTags.has(tag))
       sphere.visible = hasActiveTag
     }
   })
-  
+
   // Also update connection visibility
-  connections.forEach(connection => {
-    const sourceSphere = spheres.find(sphere => sphere.userData.id === connection.userData.source)
-    const targetSphere = spheres.find(sphere => sphere.userData.id === connection.userData.target)
-    
+  connections.forEach((connection) => {
+    const sourceSphere = spheres.find((sphere) => sphere.userData.id === connection.userData.source)
+    const targetSphere = spheres.find((sphere) => sphere.userData.id === connection.userData.target)
+
     // Show connection only if both spheres are visible
     connection.visible = sourceSphere?.visible && targetSphere?.visible
   })
-  
+
   // Update flow particle visibility based on connection visibility
-  flowParticles.forEach(particleData => {
-    const sourceSphere = spheres.find(sphere => sphere.userData.id === particleData.connection.source)
-    const targetSphere = spheres.find(sphere => sphere.userData.id === particleData.connection.target)
-    
+  flowParticles.forEach((particleData) => {
+    const sourceSphere = spheres.find((sphere) => sphere.userData.id === particleData.connection.source)
+    const targetSphere = spheres.find((sphere) => sphere.userData.id === particleData.connection.target)
+
     // Show particle only if both spheres are visible
     particleData.mesh.visible = sourceSphere?.visible && targetSphere?.visible
   })
-  
+
   // Update nodesList items visibility based on active tags
-  document.querySelectorAll('.layer-container ul li').forEach(li => {
+  document.querySelectorAll(".layer-container ul li").forEach((li) => {
     // Find the corresponding sphere to get node data
     const nodeTitle = li.textContent.trim()
-    const correspondingSphere = spheres.find(sphere => sphere.userData.title === nodeTitle)
-    
+    const correspondingSphere = spheres.find((sphere) => sphere.userData.title === nodeTitle)
+
     if (correspondingSphere) {
       const nodeTags = correspondingSphere.userData.tags || []
-      
+
       if (activeTags.size === 0) {
         // If no tags are active, show all li elements
-        li.style.display = 'block'
+        li.style.display = "block"
       } else {
         // Check if node has any active tag
-        const hasActiveTag = nodeTags.some(tag => activeTags.has(tag))
-        li.style.display = hasActiveTag ? 'block' : 'none'
+        const hasActiveTag = nodeTags.some((tag) => activeTags.has(tag))
+        li.style.display = hasActiveTag ? "block" : "none"
       }
     }
   })
@@ -679,75 +658,85 @@ function updateSphereVisibility() {
 function toggleTag(tag, tagElement) {
   if (activeTags.has(tag)) {
     activeTags.delete(tag)
-    tagElement.classList.remove('active')
+    tagElement.classList.remove("active")
   } else {
     activeTags.add(tag)
-    tagElement.classList.add('active')
+    tagElement.classList.add("active")
   }
-  
+
   updateSphereVisibility()
 }
 
 function navigation(data) {
-
   // Draw all layers
 
-  const layersWrap = document.createElement('div')
-  layersWrap.classList.add('layers-wrap')
+  const layersWrap = document.createElement("div")
+  layersWrap.classList.add("layers-wrap")
 
+  data.layers.forEach((layer) => {
+    const layerContainer = document.createElement("div")
+    layerContainer.classList.add("layer-container")
 
-  data.layers.forEach(layer => {
-
-    const layerContainer = document.createElement('div')
-    layerContainer.classList.add('layer-container')
-    
     // Store layer data on the container element for keyboard shortcuts
     layerContainer._layerData = layer
 
-    let layerTitle = document.createElement('h2')
+    let layerTitle = document.createElement("h2")
 
     layerTitle.innerHTML = `${layer.name}`
 
     layerContainer.appendChild(layerTitle)
 
     // Add click event to toggle active class on layerContainer
-    layerTitle.addEventListener('click', () => {
-      console.log('Layer clicked:', layer.name, 'ID:', layer.id)
-      
-      if (layerContainer.classList.contains('active')) {
+    layerTitle.addEventListener("click", () => {
+      console.log("Layer clicked:", layer.name, "ID:", layer.id)
+
+      if (layerContainer.classList.contains("active")) {
         // If already active, just remove the active class
-        layerContainer.classList.remove('active')
+        layerContainer.classList.remove("active")
         activeLayerId = null
-        console.log('Deactivated layer:', layer.name)
+        console.log("Deactivated layer:", layer.name)
       } else {
         // Remove active class from all layer containers
-        document.querySelectorAll('.layer-container').forEach(container => {
-          container.classList.remove('active')
+        document.querySelectorAll(".layer-container").forEach((container) => {
+          container.classList.remove("active")
         })
-        
+
         // Add active class to the clicked layerContainer
-        layerContainer.classList.add('active')
+        layerContainer.classList.add("active")
         activeLayerId = layer.id
-        console.log('Activated layer:', layer.name, 'Active layer ID set to:', activeLayerId)
       }
-      
+
       // Update sphere colors based on the new layer activation state
       updateSphereColorsForActiveLayer()
     })
 
-    const nodesList = document.createElement('ul')
-    
+    const nodesList = document.createElement("ul")
+
     data.nodes
-      .filter(node => node.layerId === layer.id)
-      .forEach(node => {
-        const li = document.createElement('li')
+      .filter((node) => node.layerId === layer.id)
+      .forEach((node) => {
+        const li = document.createElement("li")
         li.textContent = node.title
-        li.style.cursor = 'pointer'
-        
+        li.style.cursor = "pointer"
+
         // Add click event listener to trigger the same functionality as sphere clicks
-        li.addEventListener('click', () => {
-          if (li.classList.contains('active')) {
-            li.classList.remove('active')
+        li.addEventListener("click", () => {
+          // Close mobile nav if viewport is below 800px
+          if (window.innerWidth < 800 && IsNavMobileOpened) {
+            IsNavMobileOpened = false
+            const navBtn = document.querySelector(".nav-btn")
+            const canvasContainer = document.getElementById("canvas-container")
+
+            if (navBtn) {
+              navBtn.classList.remove("opened")
+              navBtn.classList.add("closed")
+            }
+            navContainer.classList.remove("nav-open")
+            canvasContainer.classList.remove("nav-open")
+          }
+
+          if (li.classList.contains("active")) {
+            li.classList.remove("active")
             // Reset sphere colors and close popup when deactivating
             if (nodePopup) {
               nodePopup.remove()
@@ -758,99 +747,92 @@ function navigation(data) {
           } else {
             handleNodeSelection(node)
             // Remove active class from all li elements in all nodesLists
-            document.querySelectorAll('.layer-container ul li').forEach(liItem => {
-              liItem.classList.remove('active')
+            document.querySelectorAll(".layer-container ul li").forEach((liItem) => {
+              liItem.classList.remove("active")
             })
-            li.classList.add('active')
+            li.classList.add("active")
             updateLiColorBehavior()
           }
         })
-        
+
         // Add hover event listeners to trigger sphere hover effects
-        li.addEventListener('mouseenter', (event) => {
+        li.addEventListener("mouseenter", (event) => {
           isHoveringLiElement = true
           handleNodeHover(node, event.clientX, event.clientY, false)
         })
-        
-        li.addEventListener('mouseleave', () => {
+
+        li.addEventListener("mouseleave", () => {
           isHoveringLiElement = false
           resetHoverEffects()
         })
-        
+
         nodesList.appendChild(li)
       })
 
     layerContainer.appendChild(nodesList)
     layersWrap.appendChild(layerContainer)
-
   })
-
-
 
   // Draw all tags
 
-  const tagsUl = document.createElement('ul')
-  tagsUl.classList.add('tags-container')
+  const tagsUl = document.createElement("ul")
+  tagsUl.classList.add("tags-container")
 
   const uniqueTags = new Set()
-  
-  data.nodes.forEach(node => {
+
+  data.nodes.forEach((node) => {
     if (node.tags && Array.isArray(node.tags)) {
-      node.tags.forEach(tag => {
+      node.tags.forEach((tag) => {
         uniqueTags.add(tag)
       })
     }
   })
-  
-  uniqueTags.forEach(tag => {
-    let li = document.createElement('li')
+
+  uniqueTags.forEach((tag) => {
+    let li = document.createElement("li")
     li.innerHTML = tag
-    li.classList.add('tag-item')
-    
-    li.addEventListener('click', () => {
+    li.classList.add("tag-item")
+
+    li.addEventListener("click", () => {
       toggleTag(tag, li)
     })
 
     tagsUl.appendChild(li)
   })
 
+  const ttLogo = document.createElement("img")
+  ttLogo.src = "/images/tt-logo.svg"
+  ttLogo.classList.add("tt-logo")
 
-  const ttLogo = document.createElement('img')
-  ttLogo.src ='/images/tt-logo.svg'
-  ttLogo.classList.add('tt-logo')
+  const navBtn = document.createElement("div")
+  navBtn.classList.add("nav-btn", "closed")
 
-
-  const navBtn = document.createElement('div')
-  navBtn.classList.add('nav-btn')
-  
   let IsNavMobileOpened = false
 
-  navBtn.addEventListener('click', function() {
+  navBtn.addEventListener("click", function () {
+    const canvasContainer = document.getElementById("canvas-container")
 
     if (IsNavMobileOpened) {
-
       IsNavMobileOpened = false
-      this.classList.remove('opened')
-      this.classList.add('closed')
+      this.classList.remove("opened")
+      this.classList.add("closed")
+      navContainer.classList.remove("nav-open")
+      canvasContainer.classList.remove("nav-open")
     } else {
       IsNavMobileOpened = true
-      this.classList.remove('closed')
-      this.classList.add('opened')
+      this.classList.remove("closed")
+      this.classList.add("opened")
+      navContainer.classList.add("nav-open")
+      canvasContainer.classList.add("nav-open")
     }
-
   })
 
-  
   document.body.appendChild(navContainer)
   navContainer.appendChild(layersWrap)
   navContainer.appendChild(tagsUl)
   navContainer.appendChild(ttLogo)
-  document.body.appendChild(navBtn)
+  canvasContainer.appendChild(navBtn)
 }
-
-
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // region Mouse click events
@@ -859,31 +841,28 @@ function navigation(data) {
 // Function to handle node selection (used by both sphere clicks and li clicks)
 function handleNodeSelection(nodeData) {
   // Find the corresponding sphere
-  const clickedSphere = spheres.find(sphere => sphere.userData.id === nodeData.id)
-  
+  const clickedSphere = spheres.find((sphere) => sphere.userData.id === nodeData.id)
+
   if (!clickedSphere) return
 
   // Find the corresponding li element
-  const correspondingLi = document.querySelector(`.layer-container ul li[data-node-id="${nodeData.id}"]`) ||
-                         Array.from(document.querySelectorAll('.layer-container ul li')).find(li => 
-                           li.textContent.trim() === nodeData.title
-                         )
+  const correspondingLi = document.querySelector(`.layer-container ul li[data-node-id="${nodeData.id}"]`) || Array.from(document.querySelectorAll(".layer-container ul li")).find((li) => li.textContent.trim() === nodeData.title)
 
   // Check if the node is currently active
-  const isCurrentlyActive = correspondingLi && correspondingLi.classList.contains('active')
+  const isCurrentlyActive = correspondingLi && correspondingLi.classList.contains("active")
 
   if (isCurrentlyActive) {
     // If currently active, deactivate
     if (correspondingLi) {
-      correspondingLi.classList.remove('active')
+      correspondingLi.classList.remove("active")
     }
-    
+
     // Remove existing popup if it exists
     if (nodePopup) {
       nodePopup.remove()
       nodePopup = null
     }
-    
+
     // Reset sphere colors
     resetAllSphereColors()
     return
@@ -899,45 +878,43 @@ function handleNodeSelection(nodeData) {
   resetAllSphereColors(false)
 
   // Remove active class from all li elements
-  document.querySelectorAll('.layer-container ul li').forEach(liItem => {
-    liItem.classList.remove('active')
+  document.querySelectorAll(".layer-container ul li").forEach((liItem) => {
+    liItem.classList.remove("active")
   })
 
   // Add active class to the corresponding li element
   if (correspondingLi) {
-    correspondingLi.classList.add('active')
+    correspondingLi.classList.add("active")
   }
-  
+
   // Find and activate the layer container that contains this sphere
   const sphereLayerId = clickedSphere.userData.layerId
-  document.querySelectorAll('.layer-container').forEach(container => {
+  document.querySelectorAll(".layer-container").forEach((container) => {
     // Check if this container has the sphere by looking for its li element
-    const hasThisSphere = Array.from(container.querySelectorAll('ul li')).some(li => 
-      li.textContent.trim() === clickedSphere.userData.title
-    )
-    
+    const hasThisSphere = Array.from(container.querySelectorAll("ul li")).some((li) => li.textContent.trim() === clickedSphere.userData.title)
+
     if (hasThisSphere) {
       // Remove active class from all other layer containers
-      document.querySelectorAll('.layer-container').forEach(otherContainer => {
+      document.querySelectorAll(".layer-container").forEach((otherContainer) => {
         if (otherContainer !== container) {
-          otherContainer.classList.remove('active')
+          otherContainer.classList.remove("active")
         }
       })
-      
+
       // Activate this layer container
-      container.classList.add('active')
+      container.classList.add("active")
       activeLayerId = sphereLayerId
-      console.log('Opened layer container for sphere:', clickedSphere.userData.title, 'in layer:', sphereLayerId)
+      console.log("Opened layer container for sphere:", clickedSphere.userData.title, "in layer:", sphereLayerId)
     }
   })
-  
+
   // Update li color behavior
   updateLiColorBehavior()
 
   // Find all connected spheres
   const connectedSphereIds = new Set()
   connectedSphereIds.add(clickedSphere.userData.id) // Include the clicked sphere
-  
+
   connections.forEach((connection) => {
     if (connection.userData.source === clickedSphere.userData.id) {
       connectedSphereIds.add(connection.userData.target)
@@ -951,8 +928,8 @@ function handleNodeSelection(nodeData) {
   spheres.forEach((sphere) => {
     if (!connectedSphereIds.has(sphere.userData.id)) {
       // Unconnected spheres - make them grey
-      sphere.material.emissive.setHex(0x464D52)
-      sphere.material.color.set(0x464D52)
+      sphere.material.emissive.setHex(0x464d52)
+      sphere.material.color.set(0x464d52)
     } else {
       // Connected spheres (including clicked sphere) - ensure they are white
       if (sphere !== clickedSphere) {
@@ -964,15 +941,14 @@ function handleNodeSelection(nodeData) {
 
   // Reduce opacity of connections not involving the clicked sphere
   connections.forEach((connection) => {
-    if (connection.userData.source !== clickedSphere.userData.id && 
-        connection.userData.target !== clickedSphere.userData.id) {
+    if (connection.userData.source !== clickedSphere.userData.id && connection.userData.target !== clickedSphere.userData.id) {
       connection.material.opacity = 0.02
     }
   })
 
   // Highlight the clicked sphere and store reference
-  clickedSphere.material.emissive.setHex(0x6FD4A0)
-  clickedSphere.material.color.set(0x6FD4A0)
+  clickedSphere.material.emissive.setHex(0x6fd4a0)
+  clickedSphere.material.color.set(0x6fd4a0)
   currentlyHighlightedSphere = clickedSphere
 
   // Create new popup
@@ -997,7 +973,7 @@ function handleNodeSelection(nodeData) {
     nodePopup.appendChild(ul)
   }
 
-  document.body.appendChild(nodePopup)
+  canvasContainer.appendChild(nodePopup)
 
   // Add close button functionality
   const closeBtn = nodePopup.querySelector(".close-btn")
@@ -1008,7 +984,7 @@ function handleNodeSelection(nodeData) {
     resetAllSphereColors()
     // Remove active class from li elements when popup closes
     if (correspondingLi) {
-      correspondingLi.classList.remove('active')
+      correspondingLi.classList.remove("active")
     }
     // Update li color behavior
     updateLiColorBehavior()
@@ -1031,7 +1007,7 @@ function onMouseClick(event) {
   if (intersects.length > 0) {
     const clickedSphere = intersects[0].object
     handleNodeSelection(clickedSphere.userData)
-  } 
+  }
   // else {
   //   // Clicked on canvas but not on any sphere - close popup if it exists
   //   if (nodePopup) {
@@ -1059,13 +1035,13 @@ function onMouseMove(event) {
   if (intersects.length > 0) {
     const hoveredSphere = intersects[0].object
     handleSphereHover(hoveredSphere, event.clientX, event.clientY)
-    container.style.cursor = 'pointer'
+    container.style.cursor = "pointer"
   } else {
     // No sphere is being hovered, reset hover effects only if not hovering li element
     if (!isHoveringLiElement) {
       resetHoverEffects()
     }
-    container.style.cursor = 'default'
+    container.style.cursor = "default"
   }
 }
 
@@ -1097,7 +1073,6 @@ controls.addEventListener("end", () => {
   }, 0) // Time to restart the camera rotation animation
 })
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // region Window resize and Fullscreen
 ////////////////////////////////////////////////////////////////////////////////
@@ -1106,11 +1081,17 @@ controls.addEventListener("end", () => {
 function onWindowResize() {
   // Update canvas container width based on fullscreen state
   if (isFullscreen) {
-    canvasContainer.style.width = 'calc(100vw - 20px)'
+    canvasContainer.style.width = "calc(100vw - 20px)"
   } else {
-    canvasContainer.style.width = 'calc(100vw - 300px)'
+    // Only set width for desktop (>800px), let CSS handle mobile
+    if (window.innerWidth > 800) {
+      canvasContainer.style.width = "calc(100vw - 300px)"
+    } else {
+      // Remove inline styles on mobile to let CSS media queries take control
+      canvasContainer.style.width = ""
+    }
   }
-  
+
   // Wait for DOM to update before reading new dimensions
   requestAnimationFrame(() => {
     const width = container.clientWidth
@@ -1123,26 +1104,28 @@ function onWindowResize() {
 }
 window.addEventListener("resize", onWindowResize)
 
-
 // Fullscreen toggle functionality
-let isFullscreen = false
-const canvasContainer = document.getElementById('canvas-container')
 
 function toggleFullscreen() {
   if (isFullscreen) {
     // Return to normal view
-    canvasContainer.style.width = 'calc(100vw - 300px)'
-    canvasContainer.style.display = 'block'
+    if (window.innerWidth > 800) {
+      canvasContainer.style.width = "calc(100vw - 300px)"
+    } else {
+      // Let CSS handle mobile width
+      canvasContainer.style.width = ""
+    }
+    canvasContainer.style.display = "block"
     isFullscreen = false
 
-    navContainer.style.display = 'flex'
+    navContainer.style.display = "flex"
   } else {
     // Go to fullscreen
-    canvasContainer.style.width = 'calc(100vw - 20px)'
-    canvasContainer.style.display = 'block'
+    canvasContainer.style.width = "calc(100vw - 20px)"
+    canvasContainer.style.display = "block"
     isFullscreen = true
 
-    navContainer.style.display = 'none'
+    navContainer.style.display = "none"
   }
 
   const width = canvasContainer.clientWidth
@@ -1151,31 +1134,29 @@ function toggleFullscreen() {
   camera.updateProjectionMatrix()
   renderer.setSize(width, height)
   composer.setSize(width, height)
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // region Keyboard shortcuts
 ////////////////////////////////////////////////////////////////////////////////
 
-
 // Add keyboard event listener for 'f' key, spacebar, ESC key, and number keys (1-9)
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'f' || event.key === 'F') {
+document.addEventListener("keydown", (event) => {
+  if (event.key === "f" || event.key === "F") {
     toggleFullscreen()
-  } else if (event.key === ' ') {
+  } else if (event.key === " ") {
     event.preventDefault() // Prevent default spacebar behavior (page scroll)
-    
+
     // Toggle animation state - same logic as play button
-    if(animPlaying){
+    if (animPlaying) {
       // Pausing - capture current accumulated time
       if (!isUserControlling) {
         const currentTime = (Date.now() - animationStartTime) * 0.0001
         accumulatedTime += currentTime
       }
       animPlaying = false
-      playBtn.classList.remove('playing')
-      playBtn.classList.add('paused')
+      playBtn.classList.remove("playing")
+      playBtn.classList.add("paused")
     } else {
       // Resuming - capture current camera position and reset accumulated time
       const targetX = cameraTarget.x
@@ -1184,13 +1165,13 @@ document.addEventListener('keydown', (event) => {
       userCameraRadius = Math.sqrt((camera.position.x - targetX) * (camera.position.x - targetX) + (camera.position.z - targetZ) * (camera.position.z - targetZ))
       userCameraY = camera.position.y
       animationStartTime = Date.now()
-      accumulatedTime = 0  // Reset accumulated time to start fresh from current position
+      accumulatedTime = 0 // Reset accumulated time to start fresh from current position
       animPlaying = true
-      
-      playBtn.classList.remove('paused')
-      playBtn.classList.add('playing')
+
+      playBtn.classList.remove("paused")
+      playBtn.classList.add("playing")
     }
-  } else if (event.key === 'Escape') {
+  } else if (event.key === "Escape") {
     // Close open sphere popup if it exists
     if (nodePopup) {
       nodePopup.remove()
@@ -1198,47 +1179,47 @@ document.addEventListener('keydown', (event) => {
       // Reset sphere colors when popup closes
       resetAllSphereColors()
       // Remove active class from all li elements when popup closes
-      document.querySelectorAll('.layer-container ul li').forEach(liItem => {
-        liItem.classList.remove('active')
+      document.querySelectorAll(".layer-container ul li").forEach((liItem) => {
+        liItem.classList.remove("active")
       })
       // Update li color behavior
       updateLiColorBehavior()
     }
-    
+
     // Close active layer container if one exists
-    const activeLayerContainer = document.querySelector('.layer-container.active')
+    const activeLayerContainer = document.querySelector(".layer-container.active")
     if (activeLayerContainer) {
-      activeLayerContainer.classList.remove('active')
+      activeLayerContainer.classList.remove("active")
       activeLayerId = null
-      console.log('Closed active layer container with Esc key')
+      console.log("Closed active layer container with Esc key")
       // Update sphere colors to remove layer-based coloring
       updateSphereColorsForActiveLayer()
     }
-  } else if (event.key >= '1' && event.key <= '9') {
+  } else if (event.key >= "1" && event.key <= "9") {
     // Handle number keys 1-9 for opening layer containers
     const keyNumber = parseInt(event.key)
-    const layerContainers = document.querySelectorAll('.layer-container')
-    
+    const layerContainers = document.querySelectorAll(".layer-container")
+
     // Only enable shortcuts if there are less than 9 layers
     if (layerContainers.length < 9 && keyNumber <= layerContainers.length) {
       const targetContainer = layerContainers[keyNumber - 1] // Convert to 0-based index
-      
+
       if (targetContainer) {
         // Check if this container is already active
-        if (targetContainer.classList.contains('active')) {
+        if (targetContainer.classList.contains("active")) {
           // If already active, deactivate it
-          targetContainer.classList.remove('active')
+          targetContainer.classList.remove("active")
           activeLayerId = null
           console.log(`Deactivated layer container ${keyNumber} with number key`)
         } else {
           // Remove active class from all layer containers
-          layerContainers.forEach(container => {
-            container.classList.remove('active')
+          layerContainers.forEach((container) => {
+            container.classList.remove("active")
           })
-          
+
           // Activate the target container
-          targetContainer.classList.add('active')
-          
+          targetContainer.classList.add("active")
+
           // Get the layer data from the container element
           const layerData = targetContainer._layerData
           if (layerData) {
@@ -1246,7 +1227,7 @@ document.addEventListener('keydown', (event) => {
             console.log(`Activated layer container ${keyNumber} (${layerData.name}) with number key`)
           }
         }
-        
+
         // Update sphere colors based on the new layer activation state
         updateSphereColorsForActiveLayer()
       }
@@ -1254,26 +1235,20 @@ document.addEventListener('keydown', (event) => {
   }
 })
 
-
-
 ////////////////////////////////////////////////////////////////////////////////
 // region Play / Stop rotation
 ////////////////////////////////////////////////////////////////////////////////
 
-
-playBtn.addEventListener('click', function() {
-
-  if(animPlaying){
+playBtn.addEventListener("click", function () {
+  if (animPlaying) {
     // Pausing - capture current accumulated time
     if (!isUserControlling) {
       const currentTime = (Date.now() - animationStartTime) * 0.0001
       accumulatedTime += currentTime
     }
-    animPlaying = false;
-    this.classList.remove('playing');
-    this.classList.add('paused');
-
-
+    animPlaying = false
+    this.classList.remove("playing")
+    this.classList.add("paused")
   } else {
     // Resuming - capture current camera position and reset accumulated time
     const targetX = cameraTarget.x
@@ -1282,21 +1257,17 @@ playBtn.addEventListener('click', function() {
     userCameraRadius = Math.sqrt((camera.position.x - targetX) * (camera.position.x - targetX) + (camera.position.z - targetZ) * (camera.position.z - targetZ))
     userCameraY = camera.position.y
     animationStartTime = Date.now()
-    accumulatedTime = 0  // Reset accumulated time to start fresh from current position
-    animPlaying = true;
+    accumulatedTime = 0 // Reset accumulated time to start fresh from current position
+    animPlaying = true
 
-    this.classList.remove('paused');
-    this.classList.add('playing');
+    this.classList.remove("paused")
+    this.classList.add("playing")
   }
-  
-  
-});
-
+})
 
 ////////////////////////////////////////////////////////////////////////////////
 // region Animation
 ////////////////////////////////////////////////////////////////////////////////
-
 
 function animate() {
   requestAnimationFrame(animate)
@@ -1305,8 +1276,7 @@ function animate() {
 
   // Update flow particles
   const deltaTime = 0.016 // Approximate 60fps
-  flowParticles.forEach(particleData => {
-
+  flowParticles.forEach((particleData) => {
     // Move particles along curve from top to bottom
     // particleData.progress += particleData.speed * deltaTime
     // if (particleData.progress > 1.0) {
@@ -1318,29 +1288,27 @@ function animate() {
     if (particleData.progress < 0.0) {
       particleData.progress = 1.0
     }
-    
+
     // Update particle position
     const position = particleData.curve.getPointAt(particleData.progress)
     particleData.mesh.position.copy(position)
   })
 
   // Camera animation - rotate around target when user is not controlling
-  if(animPlaying){
-      if (!isUserControlling) {
-        const currentSessionTime = (Date.now() - animationStartTime) * 0.0001
-        const totalTime = accumulatedTime + currentSessionTime
-        const currentAngle = userCameraAngle + totalTime * 0.5
-        camera.position.x = cameraTarget.x + Math.cos(currentAngle) * userCameraRadius
-        camera.position.z = cameraTarget.z + Math.sin(currentAngle) * userCameraRadius
-        camera.position.y = userCameraY
-        camera.lookAt(cameraTarget)
+  if (animPlaying) {
+    if (!isUserControlling) {
+      const currentSessionTime = (Date.now() - animationStartTime) * 0.0001
+      const totalTime = accumulatedTime + currentSessionTime
+      const currentAngle = userCameraAngle + totalTime * 0.5
+      camera.position.x = cameraTarget.x + Math.cos(currentAngle) * userCameraRadius
+      camera.position.z = cameraTarget.z + Math.sin(currentAngle) * userCameraRadius
+      camera.position.y = userCameraY
+      camera.lookAt(cameraTarget)
     }
-  } 
+  }
 
   composer.render()
 }
-
-
 
 // Initialize
 loadData()
