@@ -553,7 +553,7 @@ async function loadData() {
     flowParticles.length = 0
     
     // Read the data.json file
-    const response = await fetch("/data/template-data-2.json")
+    const response = await fetch("/data/data-placeholder.json")
     const data = await response.json()
 
     // Create layer Y position mapping
@@ -807,7 +807,6 @@ function navigation(data) {
     li.innerHTML = tag
     li.classList.add('tag-item')
     
-    // Add click event listener to toggle tag
     li.addEventListener('click', () => {
       toggleTag(tag, li)
     })
@@ -820,11 +819,33 @@ function navigation(data) {
   ttLogo.src ='/images/tt-logo.svg'
   ttLogo.classList.add('tt-logo')
 
+
+  const navBtn = document.createElement('div')
+  navBtn.classList.add('nav-btn')
+  
+  let IsNavMobileOpened = false
+
+  navBtn.addEventListener('click', function() {
+
+    if (IsNavMobileOpened) {
+
+      IsNavMobileOpened = false
+      this.classList.remove('opened')
+      this.classList.add('closed')
+    } else {
+      IsNavMobileOpened = true
+      this.classList.remove('closed')
+      this.classList.add('opened')
+    }
+
+  })
+
   
   document.body.appendChild(navContainer)
   navContainer.appendChild(layersWrap)
   navContainer.appendChild(tagsUl)
   navContainer.appendChild(ttLogo)
+  document.body.appendChild(navBtn)
 }
 
 
@@ -1249,7 +1270,7 @@ playBtn.addEventListener('click', function() {
       accumulatedTime += currentTime
     }
     animPlaying = false;
-        this.classList.remove('playing');
+    this.classList.remove('playing');
     this.classList.add('paused');
 
 

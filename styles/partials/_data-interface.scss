@@ -20,6 +20,11 @@
   display: none;
 }
 
+html, 
+body {
+  overflow-x: hidden;
+}
+
 body {
   font-family: $work-sans;
   font-size: 15px;
@@ -37,11 +42,11 @@ body {
   background-color: $neutral-100;
         border-radius: $s-spacing;
 
-
   canvas {
       border-radius: $s-spacing;
       border: solid 1px $neutral-500;
   }
+
 
 }
 
@@ -101,7 +106,6 @@ body {
       }
 
       &.active {
-        //height: fit-content;
         background-color: $neutral-300;
         height: 50vh;
         overflow: scroll;
@@ -115,8 +119,8 @@ body {
         font-family: $garamond;
         text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
         font-size: 20px;
-        padding-bottom: 8px;
-        padding-top: 5px;
+        padding-bottom: 10px;
+        padding-top: 6px;
         cursor: pointer;
         border-bottom: solid 1px $neutral-500;
         user-select: none;
@@ -219,7 +223,51 @@ body {
     margin: auto auto $s-spacing auto;
     pointer-events: none;
     user-select: none;
+
+    @media (max-width: 800px) {
+      width: 50%
+    }
   } 
+
+}
+
+.nav-btn {
+display: none;
+  @media (max-width: 800px) {
+    display: block;
+    position: fixed;
+    bottom: $m-spacing;
+    left: $m-spacing;
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    border: solid 1px $neutral-500;
+    background-color: $neutral-200;
+    z-index: 40;
+    cursor: pointer;
+      background-position: center;
+      background-size: 50%;
+      background-repeat: no-repeat;
+      transition: filter 150ms ease-in;
+    background-image: url(/images/right-arrow.svg);
+    
+
+    &:active {
+      border-color: $neutral-700;
+      background-color: rgba(255, 255, 255, 0.05);
+      filter: brightness(1.5);
+    }
+
+    &.closed{
+      background-image: url(/images/right-arrow.svg);
+    }
+
+    &.opened{
+      background-image: url(/images/left-arrow.svg);
+    }
+
+  }
+
 
 }
 
@@ -282,9 +330,10 @@ body {
   border: solid 1px $neutral-700;
   border-radius: 10px;
   padding: $s-spacing;
-  background-color: $neutral-300;
+  background-color: rgba(53, 58, 61,0.7);
   color: white;
   z-index: 30;
+
 
   h1 {
     font-family: $garamond;

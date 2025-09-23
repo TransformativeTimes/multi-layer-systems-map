@@ -86,6 +86,11 @@
   display: none;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 body {
   font-family: "Work Sans", sans-serif;
   font-size: 15px;
@@ -160,8 +165,8 @@ body {
   font-family: "EB Garamond", serif;
   text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.5);
   font-size: 20px;
-  padding-bottom: 8px;
-  padding-top: 5px;
+  padding-bottom: 10px;
+  padding-top: 6px;
   cursor: pointer;
   border-bottom: solid 1px #59636B;
   -webkit-user-select: none;
@@ -250,6 +255,46 @@ body {
      -moz-user-select: none;
           user-select: none;
 }
+@media (max-width: 800px) {
+  .nav-container img.tt-logo {
+    width: 50%;
+  }
+}
+
+.nav-btn {
+  display: none;
+}
+@media (max-width: 800px) {
+  .nav-btn {
+    display: block;
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    border: solid 1px #59636B;
+    background-color: #26282A;
+    z-index: 40;
+    cursor: pointer;
+    background-position: center;
+    background-size: 50%;
+    background-repeat: no-repeat;
+    transition: filter 150ms ease-in;
+    background-image: url(/images/right-arrow.svg);
+  }
+  .nav-btn:active {
+    border-color: #7C868E;
+    background-color: rgba(255, 255, 255, 0.05);
+    filter: brightness(1.5);
+  }
+  .nav-btn.closed {
+    background-image: url(/images/right-arrow.svg);
+  }
+  .nav-btn.opened {
+    background-image: url(/images/left-arrow.svg);
+  }
+}
 
 .play-btn {
   position: fixed;
@@ -295,7 +340,7 @@ body {
   border: solid 1px #7C868E;
   border-radius: 10px;
   padding: 10px;
-  background-color: #353A3D;
+  background-color: rgba(53, 58, 61, 0.7);
   color: white;
   z-index: 30;
 }
