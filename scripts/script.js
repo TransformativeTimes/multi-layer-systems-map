@@ -15,6 +15,10 @@ scene.background = new THREE.Color(0x171717)
 // Get canvas container
 const container = document.getElementById("canvas-container") || document.body
 
+// Set viewport height before initializing renderer
+let vh = window.innerHeight * 0.01;
+document.documentElement.style.setProperty('--vh', `${vh}px`);
+
 // Camera setup
 // PERSPECTIVE CAMERA
 const camera = new THREE.PerspectiveCamera(65, container.clientWidth / container.clientHeight, 0.1, 1000)
@@ -27,7 +31,23 @@ camera.lookAt(1, 1, 1)
 
 // Renderer setup
 const renderer = new THREE.WebGLRenderer({ antialias: true })
-renderer.setSize(container.clientWidth, container.clientHeight)
+
+// Ensure container has valid dimensions before setting renderer size
+const ensureValidDimensions = () => {
+    if (container.clientWidth > 0 && container.clientHeight > 0) {
+        renderer.setSize(container.clientWidth, container.clientHeight)
+        return true
+    }
+    return false
+}
+
+// Try setting dimensions immediately, fallback to requestAnimationFrame if needed
+if (!ensureValidDimensions()) {
+    requestAnimationFrame(() => {
+        ensureValidDimensions()
+    })
+}
+
 container.appendChild(renderer.domElement)
 
 // Post-processing setup
@@ -65,6 +85,12 @@ scene.add(directionalLight)
 // Raycaster for click detection
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
+
+
+window.addEventListener('resize', () => {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+});
 
 // Global variable to track the current popup
 let nodePopup = null
@@ -115,12 +141,10 @@ let activeLayerId = null
 function updateSphereColorsForActiveLayer() {
   // Only apply layer-based coloring if no individual sphere is currently highlighted
   if (currentlyHighlightedSphere) {
-    console.log("Individual sphere is highlighted, skipping layer-based coloring")
     return
   }
 
   if (activeLayerId) {
-    console.log("Active layer ID:", activeLayerId)
 
     // Update sphere colors: grey for spheres not in active layer, normal for spheres in active layer
     spheres.forEach((sphere) => {
@@ -536,7 +560,7 @@ async function loadData() {
     flowParticles.length = 0
 
     // Read the data.json file
-    const response = await fetch("/data/data-placeholder.json")
+    const response = await fetch("./data/data-placeholder.json")
     const data = await response.json()
 
     // Create layer Y position mapping
@@ -688,13 +712,11 @@ function navigation(data) {
 
     // Add click event to toggle active class on layerContainer
     layerTitle.addEventListener("click", () => {
-      console.log("Layer clicked:", layer.name, "ID:", layer.id)
 
       if (layerContainer.classList.contains("active")) {
         // If already active, just remove the active class
         layerContainer.classList.remove("active")
         activeLayerId = null
-        console.log("Deactivated layer:", layer.name)
       } else {
         // Remove active class from all layer containers
         document.querySelectorAll(".layer-container").forEach((container) => {
@@ -801,7 +823,7 @@ function navigation(data) {
   })
 
   const ttLogo = document.createElement("img")
-  ttLogo.src = "/images/tt-logo.svg"
+  ttLogo.src = "./images/tt-logo.svg"
   ttLogo.classList.add("tt-logo")
 
   const navBtn = document.createElement("div")
@@ -818,6 +840,15 @@ function navigation(data) {
       this.classList.add("closed")
       navContainer.classList.remove("nav-open")
       canvasContainer.classList.remove("nav-open")
+      
+      // Close all active layer containers when closing nav on mobile
+      if (window.innerWidth < 800) {
+        document.querySelectorAll(".layer-container.active").forEach((container) => {
+          container.classList.remove("active")
+        })
+        activeLayerId = null
+        updateSphereColorsForActiveLayer()
+      }
     } else {
       IsNavMobileOpened = true
       this.classList.remove("closed")
@@ -887,26 +918,27 @@ function handleNodeSelection(nodeData) {
     correspondingLi.classList.add("active")
   }
 
-  // Find and activate the layer container that contains this sphere
-  const sphereLayerId = clickedSphere.userData.layerId
-  document.querySelectorAll(".layer-container").forEach((container) => {
-    // Check if this container has the sphere by looking for its li element
-    const hasThisSphere = Array.from(container.querySelectorAll("ul li")).some((li) => li.textContent.trim() === clickedSphere.userData.title)
+  // Find and activate the layer container that contains this sphere (only on desktop)
+  if (window.innerWidth >= 800) {
+    const sphereLayerId = clickedSphere.userData.layerId
+    document.querySelectorAll(".layer-container").forEach((container) => {
+      // Check if this container has the sphere by looking for its li element
+      const hasThisSphere = Array.from(container.querySelectorAll("ul li")).some((li) => li.textContent.trim() === clickedSphere.userData.title)
 
-    if (hasThisSphere) {
-      // Remove active class from all other layer containers
-      document.querySelectorAll(".layer-container").forEach((otherContainer) => {
-        if (otherContainer !== container) {
-          otherContainer.classList.remove("active")
-        }
-      })
+      if (hasThisSphere) {
+        // Remove active class from all other layer containers
+        document.querySelectorAll(".layer-container").forEach((otherContainer) => {
+          if (otherContainer !== container) {
+            otherContainer.classList.remove("active")
+          }
+        })
 
-      // Activate this layer container
-      container.classList.add("active")
-      activeLayerId = sphereLayerId
-      console.log("Opened layer container for sphere:", clickedSphere.userData.title, "in layer:", sphereLayerId)
-    }
-  })
+        // Activate this layer container
+        container.classList.add("active")
+        activeLayerId = sphereLayerId
+      }
+    })
+  }
 
   // Update li color behavior
   updateLiColorBehavior()
@@ -978,6 +1010,16 @@ function handleNodeSelection(nodeData) {
   // Add close button functionality
   const closeBtn = nodePopup.querySelector(".close-btn")
   closeBtn.addEventListener("click", () => {
+    // Close layerContainer on mobile if viewport is less than 800px
+    if (window.innerWidth < 800) {
+      const activeLayerContainer = document.querySelector(".layer-container.active")
+      if (activeLayerContainer) {
+        activeLayerContainer.classList.remove("active")
+        activeLayerId = null
+        updateSphereColorsForActiveLayer()
+      }
+    }
+    
     nodePopup.remove()
     nodePopup = null
     // Reset sphere colors when popup closes
@@ -1191,7 +1233,6 @@ document.addEventListener("keydown", (event) => {
     if (activeLayerContainer) {
       activeLayerContainer.classList.remove("active")
       activeLayerId = null
-      console.log("Closed active layer container with Esc key")
       // Update sphere colors to remove layer-based coloring
       updateSphereColorsForActiveLayer()
     }
@@ -1210,7 +1251,6 @@ document.addEventListener("keydown", (event) => {
           // If already active, deactivate it
           targetContainer.classList.remove("active")
           activeLayerId = null
-          console.log(`Deactivated layer container ${keyNumber} with number key`)
         } else {
           // Remove active class from all layer containers
           layerContainers.forEach((container) => {
@@ -1224,7 +1264,6 @@ document.addEventListener("keydown", (event) => {
           const layerData = targetContainer._layerData
           if (layerData) {
             activeLayerId = layerData.id
-            console.log(`Activated layer container ${keyNumber} (${layerData.name}) with number key`)
           }
         }
 
