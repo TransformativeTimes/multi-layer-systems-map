@@ -95,5 +95,5 @@ npm run build
 
 - **Three.js**: 3D graphics and visualization
 - **Vite**: Build tool and development server
-- **Vanilla JavaScript**: Core application logic
+- **JavaScript**: Core application logic
 - **SCSS**: Styling and responsive design
