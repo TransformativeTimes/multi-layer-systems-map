@@ -44,7 +44,7 @@ Move between layers, filter information, and study how elements interconnect to 
 
 1. Clone this repository  
 2. Open the folder in your terminal  
-3. Install dependencies and start the local development server  
+3. Install dependencies and start the local development server:
 
 ```bash
 npm install
@@ -84,7 +84,7 @@ Replace the sample data in `public/data/data.json` with your own data following 
 
 ### Build for Production
 
-Generate the optimized dist folder for deployment:
+Generate the optimized `dist/` folder for deployment:
 
 ```bash
 npm run build 
