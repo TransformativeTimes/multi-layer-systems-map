@@ -10,7 +10,7 @@ An interactive 3D visualization tool for exploring multi-layered system relation
 - **3D environment**: Immersive Three.js-powered visualization
 - **Custom data**: Edit the data.json file to view your own data
 - **Responsive design**: Works across desktop and mobile devices
-<br><br>
+<br><br><br>
 
 ## How to use
 
@@ -25,7 +25,7 @@ An interactive 3D visualization tool for exploring multi-layered system relation
 - **ESC**: Close opened nodes and layers
 - **F**: Toggle between fullscren mode
 - **Number keys**: Navigate between layers
-<br><br>
+<br><br><br>
 
 ## Setup
 
