@@ -16,15 +16,12 @@ scene.background = new THREE.Color(0x171717)
 const container = document.getElementById("canvas-container") || document.body
 
 // Set viewport height before initializing renderer
-let vh = window.innerHeight * 0.01;
-document.documentElement.style.setProperty('--vh', `${vh}px`);
+let vh = window.innerHeight * 0.01
+document.documentElement.style.setProperty("--vh", `${vh}px`)
 
 // Camera setup
 // PERSPECTIVE CAMERA
 const camera = new THREE.PerspectiveCamera(65, container.clientWidth / container.clientHeight, 0.1, 1000)
-
-// ORTHOGRAPHIC CAMERA
-//const camera = new THREE.OrthographicCamera( window.innerWidth / - 2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / - 2, 1, 1000 );
 
 camera.position.set(0, 180, 50)
 camera.lookAt(1, 1, 1)
@@ -34,18 +31,18 @@ const renderer = new THREE.WebGLRenderer({ antialias: true })
 
 // Ensure container has valid dimensions before setting renderer size
 const ensureValidDimensions = () => {
-    if (container.clientWidth > 0 && container.clientHeight > 0) {
-        renderer.setSize(container.clientWidth, container.clientHeight)
-        return true
-    }
-    return false
+  if (container.clientWidth > 0 && container.clientHeight > 0) {
+    renderer.setSize(container.clientWidth, container.clientHeight)
+    return true
+  }
+  return false
 }
 
 // Try setting dimensions immediately, fallback to requestAnimationFrame if needed
 if (!ensureValidDimensions()) {
-    requestAnimationFrame(() => {
-        ensureValidDimensions()
-    })
+  requestAnimationFrame(() => {
+    ensureValidDimensions()
+  })
 }
 
 container.appendChild(renderer.domElement)
@@ -86,11 +83,10 @@ scene.add(directionalLight)
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
-
-window.addEventListener('resize', () => {
-    let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-});
+window.addEventListener("resize", () => {
+  let vh = window.innerHeight * 0.01
+  document.documentElement.style.setProperty("--vh", `${vh}px`)
+})
 
 // Global variable to track the current popup
 let nodePopup = null
@@ -145,7 +141,6 @@ function updateSphereColorsForActiveLayer() {
   }
 
   if (activeLayerId) {
-
     // Update sphere colors: grey for spheres not in active layer, normal for spheres in active layer
     spheres.forEach((sphere) => {
       if (sphere.userData.layerId !== activeLayerId) {
@@ -596,10 +591,6 @@ async function loadData() {
       const validPosition = generateValidPosition(spheres, layerY)
       sphere.position.copy(validPosition)
 
-      // Remove render order modifications since we don't want spheres on top of each other
-      // sphere.renderOrder = 1000
-      // sphere.material.depthTest = false
-
       // Store the node data with the sphere
       sphere.userData = node
 
@@ -712,7 +703,6 @@ function navigation(data) {
 
     // Add click event to toggle active class on layerContainer
     layerTitle.addEventListener("click", () => {
-
       if (layerContainer.classList.contains("active")) {
         // If already active, just remove the active class
         layerContainer.classList.remove("active")
@@ -840,7 +830,7 @@ function navigation(data) {
       this.classList.add("closed")
       navContainer.classList.remove("nav-open")
       canvasContainer.classList.remove("nav-open")
-      
+
       // Close all active layer containers when closing nav on mobile
       if (window.innerWidth < 800) {
         document.querySelectorAll(".layer-container.active").forEach((container) => {
@@ -991,8 +981,8 @@ function handleNodeSelection(nodeData) {
     <div class="close-btn"></div>
     <h1>${clickedSphere.userData.title}</h1>
     <p>${clickedSphere.userData.description}</p>
-
   `
+
   if (clickedSphere.userData.tags && Array.isArray(clickedSphere.userData.tags)) {
     const ul = document.createElement("ul")
 
@@ -1019,7 +1009,7 @@ function handleNodeSelection(nodeData) {
         updateSphereColorsForActiveLayer()
       }
     }
-    
+
     nodePopup.remove()
     nodePopup = null
     // Reset sphere colors when popup closes
@@ -1050,15 +1040,6 @@ function onMouseClick(event) {
     const clickedSphere = intersects[0].object
     handleNodeSelection(clickedSphere.userData)
   }
-  // else {
-  //   // Clicked on canvas but not on any sphere - close popup if it exists
-  //   if (nodePopup) {
-  //     nodePopup.remove()
-  //     nodePopup = null
-  //     // Reset sphere colors when popup closes
-  //     resetAllSphereColors()
-  //   }
-  // }
 }
 
 // Mouse move handler for hover effects
