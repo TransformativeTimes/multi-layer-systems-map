@@ -60,10 +60,12 @@ Structure your data with:
 ``` json
 {
   "layers": [
-    { "id": "layer_01", "name": "Layer 1", "order": 0 }
+    { "id": "layer_01", "name": "Layer 1", "order": 0 },
+    { "id": "layer_02", "name": "Layer 2", "order": 1 },
   ],
   "nodes": [
-    { "id": "n0001", "layerId": "layer_01", "title": "Node Title", "description": "Example node", "tags": ["tag1"] }
+    { "id": "n0001", "layerId": "layer_01", "title": "Node A Title", "description": "Example node A", "tags": ["tag1","tag2"] },
+    { "id": "n0002", "layerId": "layer_02", "title": "Node B Title", "description": "Example node B", "tags": ["tag1","tag2"] }
   ],
   "connections": [
     { "source": "n0001", "target": "n0002" }
