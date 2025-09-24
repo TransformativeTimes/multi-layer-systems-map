@@ -1,6 +1,6 @@
 # Multi-Layer Systems Map
 
-An interactive 3D visualization tool for exploring multi-layered system relationships using Three.js. Navigate through different layers and filter data to understand complex system dynamics and connections.
+An interactive 3D visualization tool for exploring multi-layered system relationships. Navigate through different layers and filter data to understand complex system dynamics and connections.
 
 ### Features
 
@@ -10,12 +10,12 @@ An interactive 3D visualization tool for exploring multi-layered system relation
 - **3D environment**: Immersive Three.js-powered visualization
 - **Custom data**: Edit the data.json file to view your own data
 - **Responsive design**: Works across desktop and mobile devices
-
+<br><br>
 
 ## How to use
 
 ### Interact with the nodes
-- Click on nodes to view detailed descriptions
+- Click on nodes to view detailed descriptions 
 - Hover over nodes to see connection highlights
 - Use mouse/touch controls to rotate and zoom the 3D view
 
@@ -25,6 +25,7 @@ An interactive 3D visualization tool for exploring multi-layered system relation
 - **ESC**: Close opened nodes and layers
 - **F**: Toggle between fullscren mode
 - **Number keys**: Navigate between layers
+<br><br>
 
 ## Setup
 
@@ -33,6 +34,8 @@ An interactive 3D visualization tool for exploring multi-layered system relation
 - Modern web browser with WebGL support
 
 ### Installation
+Start by cloning this repo, then open it with your terminal and install the deppendencies and start a local server for development.
+
 ```bash
 npm install
 npm run dev
@@ -54,6 +57,16 @@ Replace the sample data in `public/data/data.json` with your own system data fol
 
 ### Build the production version with:
 
+Finally, create/update the `dist` folder to be ready for deployment.
+
 ```bash
 npm run build 
 ```
+<br><br>
+
+## Technologies
+
+- **Three.js**: 3D graphics and visualization
+- **Vite**: Build tool and development server
+- **Vanilla JavaScript**: Core application logic
+- **SCSS**: Styling and responsive design
