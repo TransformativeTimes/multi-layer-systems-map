@@ -1,10 +1,6 @@
 # Multi-Layer Systems Map
 
-An open-source interactive 3D tool for exploring complex systems. 
-An interactive 3D visualization tool for exploring multi-layered system relationships. Navigate through different layers and filter data to understand complex system dynamics and connections.
-
-
-An open-source interactive 3D data visualization for exploring complex systems.
+An open-source interactive 3D data visualization tool for exploring complex systems.
 Move between layers, filter information, and study how elements interconnect to reveal underlying system dynamics.
 
 ### Features
