@@ -1,41 +1,50 @@
 # Multi-Layer Systems Map
 
+An open-source interactive 3D tool for exploring complex systems. 
 An interactive 3D visualization tool for exploring multi-layered system relationships. Navigate through different layers and filter data to understand complex system dynamics and connections.
+
+
+An open-source interactive 3D data visualization for exploring complex systems.
+Move between layers, filter information, and study how elements interconnect to reveal underlying system dynamics.
 
 ### Features
 
-- **Multi-layer visualization**: Navigate between different system layers
-- **Interactive nodes**: Click and explore interconnected system elements
-- **Tag-based filtering**: Filter and organize information using the tags system
-- **3D environment**: Immersive Three.js-powered visualization
-- **Custom data**: Edit the data.json file to view your own data
-- **Responsive design**: Works across desktop and mobile devices
+- **Multi-layer visualization**: Switch between different system layers for a structured view  
+- **Interactive nodes**: Click on nodes to reveal details and their connections  
+- **Tag-based filtering**: Filter and organize information using tags  
+- **3D environment**: Immersive Three.js-powered visualization  
+- **Custom data**: Easily load your own data by editing a single JSON file  
+- **Responsive design**: Works on both desktop and mobile devices  
 <br><br><br>
 
 ## How to use
 
 ### Interact with the data
-- Click on the nodes to view their data and respective connections with other nodes
-— Explore the side panel to navigate the data in a list form
-— Select tags to filter data in the visualization and in the side panel
-- Use mouse/touch controls to rotate and zoom the 3D view
+- Click on nodes to view their details and connections  
+- Use the side panel to navigate through the data in a list view  
+- Select tags to filter nodes in both the visualization and the side panel  
+- Rotate and zoom the 3D scene using your mouse or touch controls
 
 ### Keyboard shortcuts
 
-- **Space**: Play/pause rotation animation
-- **ESC**: Close opened nodes and layers
+- **Space**: Play/pause the rotation animation
+- **ESC**: Close open nodes and layers
 - **F**: Toggle between fullscren mode
-- **Number keys**: Navigate between layers
+- **Number keys (1, 2, 3, …)**: Switch between layers
 <br><br><br>
 
 ## Setup
 
 ### Prerequisites
-- Node.js (for development)
+
+- [Node.js](https://nodejs.org/) installed
 - Modern web browser with WebGL support
 
 ### Installation
-Start by cloning this repo, then open it with your terminal and install the dependencies and start a local server for development.
+
+1. Clone this repository  
+2. Open the folder in your terminal  
+3. Install dependencies and start the local development server  
 
 ```bash
 npm install
@@ -44,20 +53,38 @@ npm run dev
 
 ### Build your data.json file
 
-The visualization reads from `public/data/data.json`. Structure your data with:
+The visualization reads from `public/data/data.json`. 
+
+Structure your data with:
 
 - **layers**: Define layers with `id`, `name`, and `order`
 - **nodes**: Create system elements with `id`, `layerId`, `title`, `description`, and `tags`
 - **connections**: Establish relationships between elements with `source`, and `target`
+
+Like so:
+
+``` json
+{
+  "layers": [
+    { "id": "layer_01", "name": "Layer 1", "order": 0 }
+  ],
+  "nodes": [
+    { "id": "n0001", "layerId": "layer_01", "title": "Node Title", "description": "Example node", "tags": ["tag1"] }
+  ],
+  "connections": [
+    { "source": "n0001", "target": "n0002" }
+  ]
+}
+```
 
 ### Load your data
 
 Replace the sample data in `public/data/data.json` with your own data following the same JSON structure.
 
 
-### Build the production version
+### Build for Production
 
-Finally, create/update the `dist` folder to be ready for deployment.
+Generate the optimized dist folder for deployment:
 
 ```bash
 npm run build 
