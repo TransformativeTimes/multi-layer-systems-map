@@ -14,9 +14,10 @@ An interactive 3D visualization tool for exploring multi-layered system relation
 
 ## How to use
 
-### Interact with the nodes
-- Click on nodes to view detailed descriptions 
-- Hover over nodes to see connection highlights
+### Interact with the data
+- Click on the nodes to view their data and respective connections with other nodes
+— Explore the side panel to navigate the data in a list form
+— Select tags to filter data in the visualization and in the side panel
 - Use mouse/touch controls to rotate and zoom the 3D view
 
 ### Keyboard shortcuts
@@ -34,7 +35,7 @@ An interactive 3D visualization tool for exploring multi-layered system relation
 - Modern web browser with WebGL support
 
 ### Installation
-Start by cloning this repo, then open it with your terminal and install the deppendencies and start a local server for development.
+Start by cloning this repo, then open it with your terminal and install the dependencies and start a local server for development.
 
 ```bash
 npm install
@@ -45,17 +46,16 @@ npm run dev
 
 The visualization reads from `public/data/data.json`. Structure your data with:
 
-- **layers**: Define temporal or conceptual layers with `id`, `name`, and `order`
-- **nodes**: System elements with `id`, `layerId`, `title`, `description`, and `tags`
-- **connections**: Relationships between nodes with `source`, `target`
-- **tags**: Categories for filtering and grouping nodes
+- **layers**: Define layers with `id`, `name`, and `order`
+- **nodes**: Create system elements with `id`, `layerId`, `title`, `description`, and `tags`
+- **connections**: Establish relationships between elements with `source`, and `target`
 
 ### Load your data
 
-Replace the sample data in `public/data/data.json` with your own system data following the same JSON structure.
+Replace the sample data in `public/data/data.json` with your own data following the same JSON structure.
 
 
-### Build the production version with:
+### Build the production version
 
 Finally, create/update the `dist` folder to be ready for deployment.
 

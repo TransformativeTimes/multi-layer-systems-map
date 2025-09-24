@@ -1,5 +1,11 @@
 # IDE files
 .vscode/
 
+#node modules
+node_modules/
+
 # macOS system files
 .DS_Store
+
+#dist folder
+dist/
