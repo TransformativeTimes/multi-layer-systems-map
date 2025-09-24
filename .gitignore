@@ -1,11 +1,23 @@
 # IDE files
 .vscode/
 
-#node modules
+# Node modules
 node_modules/
+
+# Build output
+dist/
+
+# Environment files
+*.env*
+
+# Log files
+*.log
+
+# Cache directories
+.cache/
+
+# Coverage reports
+coverage/
 
 # macOS system files
 .DS_Store
-
-#dist folder
-dist/

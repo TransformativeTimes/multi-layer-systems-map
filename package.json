@@ -1,4 +1,14 @@
 {
+  "name": "system-map",
+  "version": "1.0.0",
+  "description": "Interactive 3D visualization tool for exploring multi-layered system relationships",
+  "author": "Transformative Times",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TransformativeTimes/multi-layer-systems-map"
+  },
+  "keywords": ["data-visualization", "threejs", "interactive", "systems", "multi-layer-system"],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
