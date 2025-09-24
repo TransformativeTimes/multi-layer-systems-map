@@ -3,6 +3,8 @@
 An open-source interactive 3D data visualization tool for exploring complex systems.
 Move between layers, filter information, and study how elements interconnect to reveal underlying system dynamics.
 
+![Multi-Layer Systems Visualization](./doc_imgs/multi-layer-system.jpg)
+
 ### Features
 
 - **Multi-layer visualization**: Switch between different system layers for a structured view  
@@ -14,6 +16,8 @@ Move between layers, filter information, and study how elements interconnect to 
 <br><br><br>
 
 ## How to use
+
+![System Element Connection](./doc_imgs/system-element-connection.jpg)
 
 ### Interact with the data
 - Click on nodes to view their details and connections  
