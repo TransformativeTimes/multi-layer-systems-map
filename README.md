@@ -1,4 +1,4 @@
-# Multi-Layer Systems Map
+# Multi-Layer Systems Visualization
 
 An open-source interactive 3D data visualization tool for exploring complex systems.
 Move between layers, filter information, and study how elements interconnect to reveal underlying system dynamics.
@@ -13,7 +13,7 @@ Move between layers, filter information, and study how elements interconnect to 
 - **3D environment**: Immersive Three.js-powered visualization  
 - **Custom data**: Easily load your own data by editing a single JSON file  
 - **Responsive design**: Works on both desktop and mobile devices  
-<br><br><br>
+<br><br>
 
 ## How to use
 
