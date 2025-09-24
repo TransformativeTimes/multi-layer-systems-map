@@ -560,7 +560,7 @@ async function loadData() {
     flowParticles.length = 0
 
     // Read the data.json file
-    const response = await fetch("./data/data-placeholder.json")
+    const response = await fetch("./data/data.json")
     const data = await response.json()
 
     // Create layer Y position mapping

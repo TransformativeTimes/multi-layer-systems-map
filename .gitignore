@@ -1,0 +1,8 @@
+# IDE files
+.vscode/
+
+# claude
+.claude/
+
+# macOS system files
+.DS_Store
