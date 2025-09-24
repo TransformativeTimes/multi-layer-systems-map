@@ -65,7 +65,7 @@ Structure your data with:
 {
   "layers": [
     { "id": "layer_01", "name": "Layer 1", "order": 0 },
-    { "id": "layer_02", "name": "Layer 2", "order": 1 },
+    { "id": "layer_02", "name": "Layer 2", "order": 1 }
   ],
   "nodes": [
     { "id": "n0001", "layerId": "layer_01", "title": "Node A Title", "description": "Example node A", "tags": ["tag1","tag2"] },
