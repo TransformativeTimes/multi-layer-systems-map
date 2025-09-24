@@ -50,14 +50,12 @@ npm run dev
 ### Build your data.json file
 
 The visualization reads from `public/data/data.json`. 
-
 Structure your data with:
 
 - **layers**: Define layers with `id`, `name`, and `order`
 - **nodes**: Create system elements with `id`, `layerId`, `title`, `description`, and `tags`
 - **connections**: Establish relationships between elements with `source`, and `target`
 
-Like so:
 
 ``` json
 {
