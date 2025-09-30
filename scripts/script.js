@@ -571,6 +571,12 @@ async function loadData() {
       layerYPositions[layer.id] = -layer.order * layerSpacing + centerOffset
     })
 
+    // Count nodes per layer
+    const layerNodeCounts = {}
+    data.layers.forEach((layer) => {
+      layerNodeCounts[layer.id] = data.nodes.filter((node) => node.layerId === layer.id).length
+    })
+
     // Create spheres for each node
     const sphereGeometry = new THREE.SphereGeometry(sphereRadius, 32, 16)
 
@@ -587,9 +593,15 @@ async function loadData() {
       // Get the Y position for this node's layer
       const layerY = layerYPositions[node.layerId] || 0
 
-      // Generate a valid position that doesn't overlap with existing spheres
-      const validPosition = generateValidPosition(spheres, layerY)
-      sphere.position.copy(validPosition)
+      // Check if this node is the only node in its layer
+      if (layerNodeCounts[node.layerId] === 1) {
+        // Position at center (0, layerY, 0)
+        sphere.position.set(0, layerY, 0)
+      } else {
+        // Generate a valid position that doesn't overlap with existing spheres
+        const validPosition = generateValidPosition(spheres, layerY)
+        sphere.position.copy(validPosition)
+      }
 
       // Store the node data with the sphere
       sphere.userData = node
@@ -806,6 +818,30 @@ function navigation(data) {
     li.classList.add("tag-item")
 
     li.addEventListener("click", () => {
+      // Close the clicked sphere if it exists
+      if (currentlyHighlightedSphere) {
+        // Close the popup
+        if (nodePopup) {
+          nodePopup.remove()
+          nodePopup = null
+        }
+        // Reset sphere colors
+        resetAllSphereColors()
+        // Remove active class from all li elements
+        document.querySelectorAll(".layer-container ul li").forEach((liItem) => {
+          liItem.classList.remove("active")
+        })
+        // Update li color behavior
+        updateLiColorBehavior()
+      }
+
+      // Close any active layer containers
+      document.querySelectorAll(".layer-container.active").forEach((container) => {
+        container.classList.remove("active")
+      })
+      activeLayerId = null
+      updateSphereColorsForActiveLayer()
+
       toggleTag(tag, li)
     })
 
