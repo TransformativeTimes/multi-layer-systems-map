@@ -1014,10 +1014,14 @@ function handleNodeSelection(nodeData) {
   nodePopup.className = "node-popup"
 
   nodePopup.innerHTML = `
-    <div class="close-btn"></div>
-    <h1>${clickedSphere.userData.title}</h1>
-    <p>${clickedSphere.userData.description}</p>
-  `
+    <div class="node-popup-header">
+      <div class="close-btn"></div>
+      <h1>${clickedSphere.userData.title}</h1>
+    </div>
+    <div class="node-popup-content">
+      <p>${clickedSphere.userData.description}</p>
+    </div>
+    `
 
   if (clickedSphere.userData.tags && Array.isArray(clickedSphere.userData.tags)) {
     const ul = document.createElement("ul")

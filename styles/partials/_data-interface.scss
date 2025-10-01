@@ -32,6 +32,10 @@ body {
   background-color: $neutral-200;
 }
 
+strong {
+  font-weight: 600;
+}
+
 #canvas-container {
   position: fixed;
   width: calc(100vw - 300px);
@@ -351,10 +355,18 @@ body {
   max-width: 300px;
   border: solid 1px $neutral-700;
   border-radius: 10px;
-  padding: $s-spacing;
-  background-color: rgba(53, 58, 61, 0.7);
+  padding: $s-spacing $s-spacing 0 $s-spacing;
+  background-color: rgba(53, 58, 61, 0.85);
   color: white;
   z-index: 30;
+
+
+  .node-popup-content {
+    padding-top: $m-spacing;
+    max-height: calc(var(--vh, 1vh) * 70);
+    overflow: scroll;
+    padding-bottom: $m-spacing;
+  }
 
   @media (max-width: 800px) {
     top: $m-spacing;
@@ -370,18 +382,19 @@ body {
     padding-right: 50px;
     line-height: 110%;
     padding-bottom: $s-spacing;
-    margin-bottom: $m-spacing;
+    margin-bottom: 0;
     border-bottom: solid 1px $neutral-700;
   }
 
   p {
-    margin-bottom: $l-spacing;
+    margin-bottom: $m-spacing;
     color: $neutral-1000;
   }
 
   ul {
     display: flex;
     gap: $s-spacing;
+    margin-bottom: $s-spacing;
 
     li {
       padding: $xs-spacing $s-spacing;
