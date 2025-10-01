@@ -1366,6 +1366,14 @@ function animate() {
   composer.render()
 }
 
-// Initialize
-loadData()
-animate()
+// Initialize - wait for DOM to be fully ready before loading data
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    loadData()
+    animate()
+  })
+} else {
+  // DOM already loaded
+  loadData()
+  animate()
+}
