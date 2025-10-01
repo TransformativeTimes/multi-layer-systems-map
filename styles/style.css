@@ -121,6 +121,11 @@ body {
   height: calc(var(--vh, 1vh) * 50);
   overflow: scroll;
 }
+@media (max-width: 800px) {
+  .nav-container .layers-wrap .layer-container.active {
+    height: calc(var(--vh, 1vh) * 42);
+  }
+}
 .nav-container .layers-wrap .layer-container.active h2 {
   background-color: #353A3D;
 }

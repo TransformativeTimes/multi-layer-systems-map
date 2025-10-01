@@ -128,6 +128,10 @@ body {
           height: calc(var(--vh, 1vh) * 50);
         overflow: scroll;
 
+        @media (max-width: 800px) {
+          height: calc(var(--vh, 1vh) * 42);
+        }
+
         h2 {
           background-color: $neutral-300;
         }
