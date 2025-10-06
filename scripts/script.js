@@ -462,8 +462,13 @@ function handleNodeHover(nodeData, mouseX, mouseY, showTooltipFlag = true) {
     let resetColor = 0xffffff
 
     // Check if a sphere is currently highlighted (clicked)
-    if (currentlyHighlightedSphere && !isConnectedToHighlighted(currentlyHoveredSphere)) {
-      resetColor = 0x464d52
+    if (currentlyHighlightedSphere) {
+      // If connected to highlighted sphere, reset to white, otherwise grey
+      if (isConnectedToHighlighted(currentlyHoveredSphere)) {
+        resetColor = 0xffffff
+      } else {
+        resetColor = 0x464d52
+      }
     } else {
       // Check if a layer is active and this sphere is not in that layer
       if (activeLayerId && currentlyHoveredSphere.userData.layerId !== activeLayerId) {
@@ -501,8 +506,13 @@ function resetHoverEffects() {
     let resetColor = 0xffffff
 
     // Check if a sphere is currently highlighted (clicked)
-    if (currentlyHighlightedSphere && !isConnectedToHighlighted(currentlyHoveredSphere)) {
-      resetColor = 0x464d52
+    if (currentlyHighlightedSphere) {
+      // If connected to highlighted sphere, reset to white, otherwise grey
+      if (isConnectedToHighlighted(currentlyHoveredSphere)) {
+        resetColor = 0xffffff
+      } else {
+        resetColor = 0x464d52
+      }
     } else {
       // Check if a layer is active and this sphere is not in that layer
       if (activeLayerId && currentlyHoveredSphere.userData.layerId !== activeLayerId) {
